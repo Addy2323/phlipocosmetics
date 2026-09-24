@@ -13,9 +13,16 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as CartRouteImport } from './routes/cart'
 import { Route as CheckoutRouteImport } from './routes/checkout'
+import { Route as ErpRouteImport } from './routes/erp'
 import { Route as SalonRouteImport } from './routes/salon'
 import { Route as ShopRouteImport } from './routes/shop'
 import { Route as TrackRouteImport } from './routes/track'
+import { Route as ErpIndexRouteImport } from './routes/erp.index'
+import { Route as ErpAuditRouteImport } from './routes/erp.audit'
+import { Route as ErpInventoryRouteImport } from './routes/erp.inventory'
+import { Route as ErpOrdersRouteImport } from './routes/erp.orders'
+import { Route as ErpPosRouteImport } from './routes/erp.pos'
+import { Route as ErpSalonRouteImport } from './routes/erp.salon'
 import { Route as ProductSlugRouteImport } from './routes/product.$slug'
 
 const IndexRoute = IndexRouteImport.update({
@@ -38,6 +45,11 @@ const CheckoutRoute = CheckoutRouteImport.update({
   path: '/checkout',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ErpRoute = ErpRouteImport.update({
+  id: '/erp',
+  path: '/erp',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SalonRoute = SalonRouteImport.update({
   id: '/salon',
   path: '/salon',
@@ -53,6 +65,36 @@ const TrackRoute = TrackRouteImport.update({
   path: '/track',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ErpIndexRoute = ErpIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ErpRoute,
+} as any)
+const ErpAuditRoute = ErpAuditRouteImport.update({
+  id: '/audit',
+  path: '/audit',
+  getParentRoute: () => ErpRoute,
+} as any)
+const ErpInventoryRoute = ErpInventoryRouteImport.update({
+  id: '/inventory',
+  path: '/inventory',
+  getParentRoute: () => ErpRoute,
+} as any)
+const ErpOrdersRoute = ErpOrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
+  getParentRoute: () => ErpRoute,
+} as any)
+const ErpPosRoute = ErpPosRouteImport.update({
+  id: '/pos',
+  path: '/pos',
+  getParentRoute: () => ErpRoute,
+} as any)
+const ErpSalonRoute = ErpSalonRouteImport.update({
+  id: '/salon',
+  path: '/salon',
+  getParentRoute: () => ErpRoute,
+} as any)
 const ProductSlugRoute = ProductSlugRouteImport.update({
   id: '/product/$slug',
   path: '/product/$slug',
@@ -64,10 +106,17 @@ export interface FileRoutesByFullPath {
   '/account': typeof AccountRoute
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
+  '/erp': typeof ErpRouteWithChildren
   '/salon': typeof SalonRoute
   '/shop': typeof ShopRoute
   '/track': typeof TrackRoute
+  '/erp/audit': typeof ErpAuditRoute
+  '/erp/inventory': typeof ErpInventoryRoute
+  '/erp/orders': typeof ErpOrdersRoute
+  '/erp/pos': typeof ErpPosRoute
+  '/erp/salon': typeof ErpSalonRoute
   '/product/$slug': typeof ProductSlugRoute
+  '/erp/': typeof ErpIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -77,7 +126,13 @@ export interface FileRoutesByTo {
   '/salon': typeof SalonRoute
   '/shop': typeof ShopRoute
   '/track': typeof TrackRoute
+  '/erp/audit': typeof ErpAuditRoute
+  '/erp/inventory': typeof ErpInventoryRoute
+  '/erp/orders': typeof ErpOrdersRoute
+  '/erp/pos': typeof ErpPosRoute
+  '/erp/salon': typeof ErpSalonRoute
   '/product/$slug': typeof ProductSlugRoute
+  '/erp': typeof ErpIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -85,10 +140,17 @@ export interface FileRoutesById {
   '/account': typeof AccountRoute
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
+  '/erp': typeof ErpRouteWithChildren
   '/salon': typeof SalonRoute
   '/shop': typeof ShopRoute
   '/track': typeof TrackRoute
+  '/erp/audit': typeof ErpAuditRoute
+  '/erp/inventory': typeof ErpInventoryRoute
+  '/erp/orders': typeof ErpOrdersRoute
+  '/erp/pos': typeof ErpPosRoute
+  '/erp/salon': typeof ErpSalonRoute
   '/product/$slug': typeof ProductSlugRoute
+  '/erp/': typeof ErpIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -97,10 +159,17 @@ export interface FileRouteTypes {
     | '/account'
     | '/cart'
     | '/checkout'
+    | '/erp'
     | '/salon'
     | '/shop'
     | '/track'
+    | '/erp/audit'
+    | '/erp/inventory'
+    | '/erp/orders'
+    | '/erp/pos'
+    | '/erp/salon'
     | '/product/$slug'
+    | '/erp/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -110,17 +179,30 @@ export interface FileRouteTypes {
     | '/salon'
     | '/shop'
     | '/track'
+    | '/erp/audit'
+    | '/erp/inventory'
+    | '/erp/orders'
+    | '/erp/pos'
+    | '/erp/salon'
     | '/product/$slug'
+    | '/erp'
   id:
     | '__root__'
     | '/'
     | '/account'
     | '/cart'
     | '/checkout'
+    | '/erp'
     | '/salon'
     | '/shop'
     | '/track'
+    | '/erp/audit'
+    | '/erp/inventory'
+    | '/erp/orders'
+    | '/erp/pos'
+    | '/erp/salon'
     | '/product/$slug'
+    | '/erp/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -128,6 +210,7 @@ export interface RootRouteChildren {
   AccountRoute: typeof AccountRoute
   CartRoute: typeof CartRoute
   CheckoutRoute: typeof CheckoutRoute
+  ErpRoute: typeof ErpRouteWithChildren
   SalonRoute: typeof SalonRoute
   ShopRoute: typeof ShopRoute
   TrackRoute: typeof TrackRoute
@@ -164,6 +247,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CheckoutRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/erp': {
+      id: '/erp'
+      path: '/erp'
+      fullPath: '/erp'
+      preLoaderRoute: typeof ErpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/salon': {
       id: '/salon'
       path: '/salon'
@@ -185,6 +275,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TrackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/erp/': {
+      id: '/erp/'
+      path: '/'
+      fullPath: '/erp/'
+      preLoaderRoute: typeof ErpIndexRouteImport
+      parentRoute: typeof ErpRoute
+    }
+    '/erp/audit': {
+      id: '/erp/audit'
+      path: '/audit'
+      fullPath: '/erp/audit'
+      preLoaderRoute: typeof ErpAuditRouteImport
+      parentRoute: typeof ErpRoute
+    }
+    '/erp/inventory': {
+      id: '/erp/inventory'
+      path: '/inventory'
+      fullPath: '/erp/inventory'
+      preLoaderRoute: typeof ErpInventoryRouteImport
+      parentRoute: typeof ErpRoute
+    }
+    '/erp/orders': {
+      id: '/erp/orders'
+      path: '/orders'
+      fullPath: '/erp/orders'
+      preLoaderRoute: typeof ErpOrdersRouteImport
+      parentRoute: typeof ErpRoute
+    }
+    '/erp/pos': {
+      id: '/erp/pos'
+      path: '/pos'
+      fullPath: '/erp/pos'
+      preLoaderRoute: typeof ErpPosRouteImport
+      parentRoute: typeof ErpRoute
+    }
+    '/erp/salon': {
+      id: '/erp/salon'
+      path: '/salon'
+      fullPath: '/erp/salon'
+      preLoaderRoute: typeof ErpSalonRouteImport
+      parentRoute: typeof ErpRoute
+    }
     '/product/$slug': {
       id: '/product/$slug'
       path: '/product/$slug'
@@ -195,11 +327,32 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface ErpRouteChildren {
+  ErpAuditRoute: typeof ErpAuditRoute
+  ErpInventoryRoute: typeof ErpInventoryRoute
+  ErpOrdersRoute: typeof ErpOrdersRoute
+  ErpPosRoute: typeof ErpPosRoute
+  ErpSalonRoute: typeof ErpSalonRoute
+  ErpIndexRoute: typeof ErpIndexRoute
+}
+
+const ErpRouteChildren: ErpRouteChildren = {
+  ErpAuditRoute: ErpAuditRoute,
+  ErpInventoryRoute: ErpInventoryRoute,
+  ErpOrdersRoute: ErpOrdersRoute,
+  ErpPosRoute: ErpPosRoute,
+  ErpSalonRoute: ErpSalonRoute,
+  ErpIndexRoute: ErpIndexRoute,
+}
+
+const ErpRouteWithChildren = ErpRoute._addFileChildren(ErpRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccountRoute: AccountRoute,
   CartRoute: CartRoute,
   CheckoutRoute: CheckoutRoute,
+  ErpRoute: ErpRouteWithChildren,
   SalonRoute: SalonRoute,
   ShopRoute: ShopRoute,
   TrackRoute: TrackRoute,

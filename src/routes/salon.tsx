@@ -30,9 +30,9 @@ const days = [
 ];
 
 function Salon() {
-  const [service, setService] = useState(salonServices[0].id);
-  const [stylist, setStylist] = useState(stylists[0].id);
-  const [day, setDay] = useState(days[0].date);
+  const [service, setService] = useState(salonServices[0]!.id);
+  const [stylist, setStylist] = useState(stylists[0]!.id);
+  const [day, setDay] = useState(days[0]!.date);
   const [slot, setSlot] = useState("");
   const [booked, setBooked] = useState(false);
 
