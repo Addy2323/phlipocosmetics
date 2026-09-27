@@ -109,11 +109,13 @@ export const products: Product[] = [
   },
 ];
 
+const countFor = (name: string) => products.filter((p) => p.category === name).length;
+
 export const categories = [
-  { name: "Skincare", count: 48, tint: "from-[#8B123F] to-[#B51658]" },
-  { name: "Makeup", count: 72, tint: "from-[#C2185B] to-[#8B123F]" },
-  { name: "Hair", count: 36, tint: "from-[#260713] to-[#8B123F]" },
-  { name: "Fragrance", count: 19, tint: "from-[#6D0D31] to-[#C2185B]" },
+  { name: "Skincare", count: countFor("Skincare"), tint: "from-[#8B123F] to-[#B51658]" },
+  { name: "Makeup", count: countFor("Makeup"), tint: "from-[#C2185B] to-[#8B123F]" },
+  { name: "Hair", count: countFor("Hair"), tint: "from-[#260713] to-[#8B123F]" },
+  { name: "Fragrance", count: countFor("Fragrance"), tint: "from-[#6D0D31] to-[#C2185B]" },
 ];
 
 export const salonServices = [
