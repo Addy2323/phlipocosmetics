@@ -44,27 +44,25 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          This page didn't load
-        </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Something went wrong on our end. You can try refreshing or head back home.
+      <div className="card-surface max-w-md p-10 text-center rise-in">
+        <p className="font-display text-2xl font-semibold tracking-wide text-primary">PHILIPO</p>
+        <p className="eyebrow mt-1 text-muted-foreground">Cosmetics & Beauty Salon</p>
+        <h1 className="mt-6 font-display text-3xl">This page didn't load</h1>
+        <p className="mt-3 text-sm text-muted-foreground">
+          Something went wrong on our end. Your bag is saved on this device, so nothing is lost —
+          try again or head back home.
         </p>
-        <div className="mt-6 flex flex-wrap justify-center gap-2">
+        <div className="mt-8 flex flex-wrap justify-center gap-3">
           <button
             onClick={() => {
               router.invalidate();
               reset();
             }}
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            className="btn-base btn-primary"
           >
             Try again
           </button>
-          <a
-            href="/"
-            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
-          >
+          <a href="/" className="btn-base btn-outline">
             Go home
           </a>
         </div>
