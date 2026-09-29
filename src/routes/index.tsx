@@ -85,7 +85,9 @@ function Home() {
               className={`hover-lift relative overflow-hidden rounded-xl bg-gradient-to-br ${c.tint} p-6 text-white`}
             >
               <p className="font-display text-2xl">{c.name}</p>
-              <p className="mt-1 text-xs text-white/70">{c.count} products</p>
+              <p className="mt-1 text-xs text-white/70">
+                {c.count > 0 ? `${c.count} product${c.count === 1 ? "" : "s"}` : "Coming soon"}
+              </p>
               <ArrowRight className="mt-8 size-5" />
             </Link>
           ))}

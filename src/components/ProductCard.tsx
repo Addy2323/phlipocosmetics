@@ -1,10 +1,16 @@
-import { Link } from "@tanstack/react-router";
-import { Star } from "lucide-react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { Star, Heart } from "lucide-react";
 import { money, type Product } from "@/data/shop";
 import { useCart } from "@/lib/cart";
+import { useAuth } from "@/lib/auth";
+import { useWishlist } from "@/lib/wishlist";
 
 export function ProductCard({ product }: { product: Product }) {
   const { add, setDrawerOpen } = useCart();
+  const { user } = useAuth();
+  const wishlist = useWishlist();
+  const navigate = useNavigate();
+  const wished = wishlist.has(product.id);
   return (
     <article className="group card-surface hover-lift overflow-hidden">
       <Link to="/product/$slug" params={{ slug: product.slug }} className="block">
@@ -22,6 +28,20 @@ export function ProductCard({ product }: { product: Product }) {
               {product.badge}
             </span>
           )}
+          <button
+            aria-label={wished ? `Remove ${product.name} from wishlist` : `Save ${product.name} to wishlist`}
+            onClick={(e) => {
+              e.preventDefault();
+              if (!user) {
+                navigate({ to: "/auth" });
+                return;
+              }
+              void wishlist.toggle(product.id);
+            }}
+            className="absolute right-3 top-3 grid size-10 place-items-center rounded-full bg-card/90 shadow-sm backdrop-blur transition-colors hover:bg-card"
+          >
+            <Heart className={`size-4 ${wished ? "fill-primary text-primary" : "text-muted-foreground"}`} />
+          </button>
         </div>
       </Link>
       <div className="space-y-2 p-4">

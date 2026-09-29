@@ -1,8 +1,11 @@
-import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, Search, ShoppingBag, CalendarHeart, User, X, Minus, Plus, Phone } from "lucide-react";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
+import { Home, Search, ShoppingBag, CalendarHeart, User, X, Minus, Plus, Phone, LogOut } from "lucide-react";
 import type { ReactNode } from "react";
 import { BRAND, money } from "@/data/shop";
 import { useCart } from "@/lib/cart";
+import { useAuth } from "@/lib/auth";
+import { supabase } from "@/integrations/supabase/client";
 
 const nav = [
   { to: "/", label: "Home", icon: Home },
@@ -92,7 +95,17 @@ function CartDrawer() {
 
 export function Site({ children }: { children: ReactNode }) {
   const { count, setDrawerOpen } = useCart();
+  const { user } = useAuth();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  async function handleSignOut() {
+    await queryClient.cancelQueries();
+    queryClient.clear();
+    await supabase.auth.signOut();
+    navigate({ to: "/", replace: true });
+  }
 
   return (
     <div className="flex min-h-screen flex-col pb-16 md:pb-0">
@@ -109,7 +122,7 @@ export function Site({ children }: { children: ReactNode }) {
               { to: "/shop", label: "Shop" },
               { to: "/salon", label: "Salon" },
               { to: "/track", label: "Track order" },
-              { to: "/account", label: "Account" },
+              user ? { to: "/account", label: "Account" } : { to: "/auth", label: "Sign in" },
             ].map((l) => (
               <Link
                 key={l.to}
@@ -136,6 +149,16 @@ export function Site({ children }: { children: ReactNode }) {
               </span>
             )}
           </button>
+          {user && (
+            <button
+              onClick={handleSignOut}
+              aria-label="Sign out"
+              title="Sign out"
+              className="grid size-11 place-items-center rounded-full hover:bg-secondary"
+            >
+              <LogOut className="size-5" />
+            </button>
+          )}
         </div>
       </header>
 
