@@ -9,7 +9,17 @@ export const Route = createFileRoute("/shop")({
   validateSearch: (search: Record<string, unknown>) => ({
     category: typeof search.category === "string" ? search.category : undefined,
   }),
-...
+  head: () => ({
+    meta: [
+      { title: "Shop cosmetics, skincare & hair — Philipo Cosmetics" },
+      {
+        name: "description",
+        content: "Browse Philipo Cosmetics skincare, makeup, hair and fragrance with delivery across Tanzania.",
+      },
+      { property: "og:title", content: "Shop — Philipo Cosmetics" },
+      { property: "og:description", content: "Skincare, makeup, hair and fragrance, delivered nationwide." },
+    ],
+  }),
   component: Shop,
 });
 
