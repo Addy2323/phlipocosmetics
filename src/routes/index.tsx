@@ -82,6 +82,7 @@ function Home() {
             <Link
               key={c.name}
               to="/shop"
+              search={{ category: c.name }}
               className={`hover-lift relative overflow-hidden rounded-xl bg-gradient-to-br ${c.tint} p-6 text-white`}
             >
               <p className="font-display text-2xl">{c.name}</p>

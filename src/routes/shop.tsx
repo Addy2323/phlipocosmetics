@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { SlidersHorizontal, Search } from "lucide-react";
 import { Site } from "@/components/Site";
@@ -6,22 +6,19 @@ import { ProductCard } from "@/components/ProductCard";
 import { products, categories } from "@/data/shop";
 
 export const Route = createFileRoute("/shop")({
-  head: () => ({
-    meta: [
-      { title: "Shop cosmetics, skincare & hair — Philipo Cosmetics" },
-      {
-        name: "description",
-        content: "Browse Philipo Cosmetics skincare, makeup, hair and fragrance with delivery across Tanzania.",
-      },
-      { property: "og:title", content: "Shop — Philipo Cosmetics" },
-      { property: "og:description", content: "Skincare, makeup, hair and fragrance, delivered nationwide." },
-    ],
+  validateSearch: (search: Record<string, unknown>) => ({
+    category: typeof search.category === "string" ? search.category : undefined,
   }),
+...
   component: Shop,
 });
 
 function Shop() {
-  const [cat, setCat] = useState("All");
+  const navigate = useNavigate({ from: "/shop" });
+  const { category } = Route.useSearch();
+  const cat = category && categories.some((c) => c.name === category) ? category : "All";
+  const setCat = (c: string) =>
+    navigate({ search: { category: c === "All" ? undefined : c }, replace: true });
   const [q, setQ] = useState("");
   const list = products.filter(
     (p) =>
@@ -32,7 +29,7 @@ function Shop() {
     <Site>
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
         <p className="eyebrow text-rose">Catalogue</p>
-        <h1 className="mt-2 font-display text-4xl">All products</h1>
+        <h1 className="mt-2 font-display text-4xl">{cat === "All" ? "All products" : cat}</h1>
 
         <div className="mt-8 flex flex-col gap-4 md:flex-row md:items-center">
           <label className="relative flex-1">
