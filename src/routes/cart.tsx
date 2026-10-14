@@ -29,7 +29,7 @@ function CartPage() {
           <div className="card-surface mt-8 p-12 text-center">
             <p className="font-display text-2xl">Your bag is empty</p>
             <p className="mt-2 text-sm text-muted-foreground">Start with our best sellers.</p>
-            <Link to="/shop" className="btn-base btn-primary mt-6">
+            <Link to="/shop" search={{ category: "All" }} className="btn-base btn-primary mt-6">
               Shop now
             </Link>
           </div>

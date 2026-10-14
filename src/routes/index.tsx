@@ -55,7 +55,7 @@ function Home() {
               waiting for you in {"Dar es Salaam"}.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link to="/shop" className="btn-base btn-gold">
+              <Link to="/shop" search={{ category: "All" }} className="btn-base btn-gold">
                 Shop the collection <ArrowRight className="size-4" />
               </Link>
               <Link to="/salon" className="btn-base btn-ghost-light">
@@ -99,7 +99,7 @@ function Home() {
         eyebrow="Loved by our clients"
         title="Best sellers"
         action={
-          <Link to="/shop" className="btn-base btn-outline h-10">
+          <Link to="/shop" search={{ category: "All" }} className="btn-base btn-outline h-10">
             View all
           </Link>
         }

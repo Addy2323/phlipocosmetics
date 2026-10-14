@@ -4,6 +4,8 @@ import { Check, CreditCard, Smartphone, Banknote, Loader2, AlertCircle } from "l
 import { Site } from "@/components/Site";
 import { money, BRAND } from "@/data/shop";
 import { useCart } from "@/lib/cart";
+import { useAuth } from "@/lib/auth";
+import { createOrderFromCart } from "@/lib/order-server";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -22,46 +24,72 @@ const steps = ["Delivery", "Payment", "Confirm"] as const;
 const payments = [
   { id: "momo", label: "Mobile money", hint: "M-Pesa, Tigo Pesa, Airtel Money", icon: Smartphone },
   { id: "card", label: "Card", hint: "Visa / Mastercard", icon: CreditCard },
-  { id: "cod", label: "Cash on delivery", hint: "Dar es Salaam only", icon: Banknote },
+  { id: "cod", label: "Cash on delivery", hint: "Dar es Salaam & Arusha only", icon: Banknote },
 ];
 
 function Checkout() {
+  const { user } = useAuth();
   const { subtotal, detailed, clear } = useCart();
   const [step, setStep] = useState(0);
-  const [pay, setPay] = useState("momo");
+  const [pay, setPay] = useState<"momo" | "card" | "cod">("momo");
   const [state, setState] = useState<"idle" | "loading" | "done" | "error">("idle");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [createdOrderNumber, setCreatedOrderNumber] = useState<string | null>(null);
+
+  // Form input state
+  const [fullName, setFullName] = useState(user?.fullName ?? "");
+  const [phone, setPhone] = useState(user?.phone ?? "");
+  const [city, setCity] = useState("Dar es Salaam");
+  const [area, setArea] = useState("");
+  const [notes, setNotes] = useState("");
+
   const delivery = subtotal > 150000 ? 0 : 5000;
 
-  const placeOrder = () => {
+  async function handlePlaceOrder() {
+    if (detailed.length === 0) return;
     setState("loading");
-    setTimeout(() => {
-      // Demo behaviour: mobile money succeeds, card shows the failure state.
-      if (pay === "card") setState("error");
-      else {
-        setState("done");
-        clear();
-      }
-    }, 1400);
-  };
+    setErrorMessage("");
+
+    try {
+      const items = detailed.map((d) => ({ productId: d.product.id, qty: d.qty }));
+      const result = await createOrderFromCart({
+        customerName: fullName || "Guest Customer",
+        customerPhone: phone || "0744000111",
+        deliveryCity: city,
+        deliveryArea: area || "Center",
+        deliveryNotes: notes,
+        paymentMethod: pay,
+        items,
+        userId: user?.id,
+      });
+
+      setCreatedOrderNumber(result.orderNumber);
+      setState("done");
+      clear();
+    } catch (err: any) {
+      console.error(err);
+      setErrorMessage(err.message || "Could not complete order. Please check stock availability.");
+      setState("error");
+    }
+  }
 
   if (state === "done") {
     return (
       <Site>
         <div className="mx-auto max-w-lg px-4 py-20 text-center sm:px-6">
-          <div className="mx-auto grid size-20 place-items-center rounded-full bg-primary text-primary-foreground rise-in">
+          <div className="mx-auto grid size-20 place-items-center rounded-full bg-emerald-600 text-white rise-in">
             <Check className="size-9" />
           </div>
-          <h1 className="mt-6 font-display text-4xl">Order confirmed</h1>
+          <h1 className="mt-6 font-display text-4xl">Order Confirmed!</h1>
           <p className="mt-3 text-muted-foreground">
-            Order <strong>PC-24872</strong> is confirmed. We have sent an SMS to your number and you can follow
-            every step of the delivery.
+            Your order <strong className="text-foreground">{createdOrderNumber}</strong> is confirmed. An SMS order receipt has been sent to <strong>{phone}</strong> and our delivery dispatcher will contact you.
           </p>
           <div className="mt-8 flex justify-center gap-3">
             <Link to="/track" className="btn-base btn-primary">
-              Track my order
+              Track Order Status
             </Link>
-            <Link to="/shop" className="btn-base btn-outline">
-              Keep shopping
+            <Link to="/shop" search={{ category: "All" }} className="btn-base btn-outline">
+              Keep Shopping
             </Link>
           </div>
         </div>
@@ -96,12 +124,60 @@ function Checkout() {
               <div className="space-y-4">
                 <h2 className="font-display text-2xl">Delivery details</h2>
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <Field label="Full name" placeholder="Zawadi Mremi" />
-                  <Field label="Phone number" placeholder={BRAND.phone} />
-                  <Field label="City" placeholder={BRAND.city} />
-                  <Field label="Area / street" placeholder="Masaki, Chole Road" />
+                  <div>
+                    <span className="text-xs text-muted-foreground">Full name</span>
+                    <input
+                      required
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      placeholder="Zawadi Mremi"
+                      className="mt-1 h-12 w-full rounded-xl border bg-background px-4 text-sm outline-none focus-visible:border-primary"
+                    />
+                  </div>
+                  <div>
+                    <span className="text-xs text-muted-foreground">Phone number</span>
+                    <input
+                      required
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder="0744 000 111"
+                      className="mt-1 h-12 w-full rounded-xl border bg-background px-4 text-sm outline-none focus-visible:border-primary"
+                    />
+                  </div>
+                  <div>
+                    <span className="text-xs text-muted-foreground">City / Region</span>
+                    <select
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      className="mt-1 h-12 w-full rounded-xl border bg-background px-4 text-sm outline-none focus-visible:border-primary"
+                    >
+                      <option value="Dar es Salaam">Dar es Salaam (TSh 5,000)</option>
+                      <option value="Arusha">Arusha (TSh 10,000)</option>
+                      <option value="Mwanza">Mwanza (TSh 10,000)</option>
+                      <option value="Dodoma">Dodoma (TSh 10,000)</option>
+                      <option value="Zanzibar">Zanzibar (TSh 15,000)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <span className="text-xs text-muted-foreground">Area / Street</span>
+                    <input
+                      required
+                      value={area}
+                      onChange={(e) => setArea(e.target.value)}
+                      placeholder="Masaki, Chole Road"
+                      className="mt-1 h-12 w-full rounded-xl border bg-background px-4 text-sm outline-none focus-visible:border-primary"
+                    />
+                  </div>
                 </div>
-                <Field label="Delivery notes (optional)" placeholder="Gate colour, landmark…" />
+                <div>
+                  <span className="text-xs text-muted-foreground">Delivery notes (optional)</span>
+                  <input
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    placeholder="Gate colour, landmark…"
+                    className="mt-1 h-12 w-full rounded-xl border bg-background px-4 text-sm outline-none focus-visible:border-primary"
+                  />
+                </div>
                 <button onClick={() => setStep(1)} className="btn-base btn-primary mt-2">
                   Continue to payment
                 </button>
@@ -114,7 +190,8 @@ function Checkout() {
                 {payments.map(({ id, label, hint, icon: Icon }) => (
                   <button
                     key={id}
-                    onClick={() => setPay(id)}
+                    type="button"
+                    onClick={() => setPay(id as "momo" | "card" | "cod")}
                     className={`flex w-full items-center gap-4 rounded-xl border p-4 text-left transition-colors ${
                       pay === id ? "border-primary bg-secondary" : "hover:bg-secondary/60"
                     }`}
@@ -150,26 +227,25 @@ function Checkout() {
                     </li>
                   ))}
                 </ul>
-                {state === "error" && (
-                  <div className="flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm">
-                    <AlertCircle className="mt-0.5 size-4 text-destructive" />
-                    <span>
-                      We could not confirm your card payment. Your bag is saved — try again or pay with mobile
-                      money.
-                    </span>
+
+                {errorMessage && (
+                  <div className="flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
+                    <AlertCircle className="mt-0.5 size-4 shrink-0" />
+                    <span>{errorMessage}</span>
                   </div>
                 )}
+
                 <div className="flex gap-3">
                   <button onClick={() => setStep(1)} className="btn-base btn-outline">
                     Back
                   </button>
                   <button
-                    onClick={placeOrder}
+                    onClick={handlePlaceOrder}
                     disabled={state === "loading" || detailed.length === 0}
                     className="btn-base btn-primary disabled:opacity-60"
                   >
                     {state === "loading" && <Loader2 className="size-4 animate-spin" />}
-                    {state === "loading" ? "Confirming payment…" : `Pay ${money(subtotal + delivery)}`}
+                    {state === "loading" ? "Processing Order…" : `Pay ${money(subtotal + delivery)}`}
                   </button>
                 </div>
               </div>
@@ -184,7 +260,7 @@ function Checkout() {
                 <dd>{money(subtotal)}</dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-muted-foreground">Delivery</dt>
+                <dt className="text-muted-foreground">Delivery ({city})</dt>
                 <dd>{delivery === 0 ? "Free" : money(delivery)}</dd>
               </div>
               <div className="flex justify-between border-t pt-3 font-medium">
@@ -196,17 +272,5 @@ function Checkout() {
         </div>
       </div>
     </Site>
-  );
-}
-
-function Field({ label, placeholder }: { label: string; placeholder: string }) {
-  return (
-    <label className="block">
-      <span className="text-xs text-muted-foreground">{label}</span>
-      <input
-        placeholder={placeholder}
-        className="mt-1 h-12 w-full rounded-xl border bg-background px-4 text-sm outline-none focus-visible:border-primary"
-      />
-    </label>
   );
 }

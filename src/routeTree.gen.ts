@@ -23,7 +23,10 @@ import { Route as ErpAuditRouteImport } from './routes/erp.audit'
 import { Route as ErpInventoryRouteImport } from './routes/erp.inventory'
 import { Route as ErpOrdersRouteImport } from './routes/erp.orders'
 import { Route as ErpPosRouteImport } from './routes/erp.pos'
+import { Route as ErpSalesRouteImport } from './routes/erp.sales'
 import { Route as ErpSalonRouteImport } from './routes/erp.salon'
+import { Route as ErpSettingsRouteImport } from './routes/erp.settings'
+import { Route as ErpSupportRouteImport } from './routes/erp.support'
 import { Route as ProductSlugRouteImport } from './routes/product.$slug'
 
 const IndexRoute = IndexRouteImport.update({
@@ -96,9 +99,24 @@ const ErpPosRoute = ErpPosRouteImport.update({
   path: '/pos',
   getParentRoute: () => ErpRoute,
 } as any)
+const ErpSalesRoute = ErpSalesRouteImport.update({
+  id: '/sales',
+  path: '/sales',
+  getParentRoute: () => ErpRoute,
+} as any)
 const ErpSalonRoute = ErpSalonRouteImport.update({
   id: '/salon',
   path: '/salon',
+  getParentRoute: () => ErpRoute,
+} as any)
+const ErpSettingsRoute = ErpSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => ErpRoute,
+} as any)
+const ErpSupportRoute = ErpSupportRouteImport.update({
+  id: '/support',
+  path: '/support',
   getParentRoute: () => ErpRoute,
 } as any)
 const ProductSlugRoute = ProductSlugRouteImport.update({
@@ -121,7 +139,10 @@ export interface FileRoutesByFullPath {
   '/erp/inventory': typeof ErpInventoryRoute
   '/erp/orders': typeof ErpOrdersRoute
   '/erp/pos': typeof ErpPosRoute
+  '/erp/sales': typeof ErpSalesRoute
   '/erp/salon': typeof ErpSalonRoute
+  '/erp/settings': typeof ErpSettingsRoute
+  '/erp/support': typeof ErpSupportRoute
   '/product/$slug': typeof ProductSlugRoute
   '/erp/': typeof ErpIndexRoute
 }
@@ -138,7 +159,10 @@ export interface FileRoutesByTo {
   '/erp/inventory': typeof ErpInventoryRoute
   '/erp/orders': typeof ErpOrdersRoute
   '/erp/pos': typeof ErpPosRoute
+  '/erp/sales': typeof ErpSalesRoute
   '/erp/salon': typeof ErpSalonRoute
+  '/erp/settings': typeof ErpSettingsRoute
+  '/erp/support': typeof ErpSupportRoute
   '/product/$slug': typeof ProductSlugRoute
   '/erp': typeof ErpIndexRoute
 }
@@ -157,7 +181,10 @@ export interface FileRoutesById {
   '/erp/inventory': typeof ErpInventoryRoute
   '/erp/orders': typeof ErpOrdersRoute
   '/erp/pos': typeof ErpPosRoute
+  '/erp/sales': typeof ErpSalesRoute
   '/erp/salon': typeof ErpSalonRoute
+  '/erp/settings': typeof ErpSettingsRoute
+  '/erp/support': typeof ErpSupportRoute
   '/product/$slug': typeof ProductSlugRoute
   '/erp/': typeof ErpIndexRoute
 }
@@ -177,7 +204,10 @@ export interface FileRouteTypes {
     | '/erp/inventory'
     | '/erp/orders'
     | '/erp/pos'
+    | '/erp/sales'
     | '/erp/salon'
+    | '/erp/settings'
+    | '/erp/support'
     | '/product/$slug'
     | '/erp/'
   fileRoutesByTo: FileRoutesByTo
@@ -194,7 +224,10 @@ export interface FileRouteTypes {
     | '/erp/inventory'
     | '/erp/orders'
     | '/erp/pos'
+    | '/erp/sales'
     | '/erp/salon'
+    | '/erp/settings'
+    | '/erp/support'
     | '/product/$slug'
     | '/erp'
   id:
@@ -212,7 +245,10 @@ export interface FileRouteTypes {
     | '/erp/inventory'
     | '/erp/orders'
     | '/erp/pos'
+    | '/erp/sales'
     | '/erp/salon'
+    | '/erp/settings'
+    | '/erp/support'
     | '/product/$slug'
     | '/erp/'
   fileRoutesById: FileRoutesById
@@ -330,11 +366,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ErpPosRouteImport
       parentRoute: typeof ErpRoute
     }
+    '/erp/sales': {
+      id: '/erp/sales'
+      path: '/sales'
+      fullPath: '/erp/sales'
+      preLoaderRoute: typeof ErpSalesRouteImport
+      parentRoute: typeof ErpRoute
+    }
     '/erp/salon': {
       id: '/erp/salon'
       path: '/salon'
       fullPath: '/erp/salon'
       preLoaderRoute: typeof ErpSalonRouteImport
+      parentRoute: typeof ErpRoute
+    }
+    '/erp/settings': {
+      id: '/erp/settings'
+      path: '/settings'
+      fullPath: '/erp/settings'
+      preLoaderRoute: typeof ErpSettingsRouteImport
+      parentRoute: typeof ErpRoute
+    }
+    '/erp/support': {
+      id: '/erp/support'
+      path: '/support'
+      fullPath: '/erp/support'
+      preLoaderRoute: typeof ErpSupportRouteImport
       parentRoute: typeof ErpRoute
     }
     '/product/$slug': {
@@ -352,7 +409,10 @@ interface ErpRouteChildren {
   ErpInventoryRoute: typeof ErpInventoryRoute
   ErpOrdersRoute: typeof ErpOrdersRoute
   ErpPosRoute: typeof ErpPosRoute
+  ErpSalesRoute: typeof ErpSalesRoute
   ErpSalonRoute: typeof ErpSalonRoute
+  ErpSettingsRoute: typeof ErpSettingsRoute
+  ErpSupportRoute: typeof ErpSupportRoute
   ErpIndexRoute: typeof ErpIndexRoute
 }
 
@@ -361,7 +421,10 @@ const ErpRouteChildren: ErpRouteChildren = {
   ErpInventoryRoute: ErpInventoryRoute,
   ErpOrdersRoute: ErpOrdersRoute,
   ErpPosRoute: ErpPosRoute,
+  ErpSalesRoute: ErpSalesRoute,
   ErpSalonRoute: ErpSalonRoute,
+  ErpSettingsRoute: ErpSettingsRoute,
+  ErpSupportRoute: ErpSupportRoute,
   ErpIndexRoute: ErpIndexRoute,
 }
 

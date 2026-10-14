@@ -176,9 +176,9 @@ export function Site({ children }: { children: ReactNode }) {
           <div>
             <p className="eyebrow text-gold">Shop</p>
             <ul className="mt-3 space-y-2 text-sm text-deep-foreground/75">
-              <li><Link to="/shop">All products</Link></li>
-              <li><Link to="/shop">Skincare</Link></li>
-              <li><Link to="/shop">Makeup</Link></li>
+              <li><Link to="/shop" search={{ category: "All" }}>All products</Link></li>
+              <li><Link to="/shop" search={{ category: "All" }}>Skincare</Link></li>
+              <li><Link to="/shop" search={{ category: "All" }}>Makeup</Link></li>
               <li><Link to="/track">Track an order</Link></li>
             </ul>
           </div>

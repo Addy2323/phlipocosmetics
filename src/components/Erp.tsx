@@ -1,4 +1,4 @@
-import { Link, Outlet, useRouterState } from "@tanstack/react-router";
+import { Link, Outlet, useRouterState, useNavigate } from "@tanstack/react-router";
 import {
   LayoutDashboard,
   ShoppingCart,
@@ -8,31 +8,89 @@ import {
   ScrollText,
   Store,
   Bell,
+  LogOut,
+  TrendingUp,
+  Headphones,
+  Settings,
+  ShieldAlert,
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { BRAND } from "@/data/shop";
-
-const sections = [
-  { to: "/erp", label: "Dashboard", icon: LayoutDashboard, exact: true },
-  { to: "/erp/orders", label: "Orders", icon: ShoppingCart },
-  { to: "/erp/pos", label: "Point of sale", icon: ScanBarcode },
-  { to: "/erp/inventory", label: "Inventory", icon: Boxes },
-  { to: "/erp/salon", label: "Salon ops", icon: CalendarHeart },
-  { to: "/erp/audit", label: "Audit log", icon: ScrollText },
-] as const;
+import { useAuth } from "@/lib/auth";
+import type { UserRole } from "@/lib/auth-server";
 
 export function ErpShell() {
+  const { user, signOut, hasRole } = useAuth();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const navigate = useNavigate();
+
+  // If user is not staff, show Access Denied
+  if (!user || user.role === "customer") {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background px-4">
+        <div className="card-surface max-w-md p-8 text-center rise-in">
+          <div className="mx-auto grid size-16 place-items-center rounded-full bg-destructive/10 text-destructive">
+            <ShieldAlert className="size-8" />
+          </div>
+          <h1 className="mt-4 font-display text-2xl font-semibold">Access Denied</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            You are signed in as <strong className="text-foreground">{user?.email ?? "Guest"}</strong> (Role: {user?.role ?? "None"}).
+            Staff authorization is required to view the ERP & business control center.
+          </p>
+          <div className="mt-6 flex flex-wrap justify-center gap-3">
+            <Link to="/auth" className="btn-base btn-primary">
+              Sign in with staff account
+            </Link>
+            <Link to="/" className="btn-base btn-outline">
+              Go to Storefront
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Dynamic navigation items filtered by RBAC permissions
+  const allSections = [
+    { to: "/erp", label: "Dashboard", icon: LayoutDashboard, exact: true, roles: ["admin", "sales_staff", "customer_service", "stylist"] as UserRole[] },
+    { to: "/erp/sales", label: "Sales & P&L", icon: TrendingUp, roles: ["admin", "sales_staff"] as UserRole[] },
+    { to: "/erp/orders", label: "Orders", icon: ShoppingCart, roles: ["admin", "sales_staff", "customer_service"] as UserRole[] },
+    { to: "/erp/pos", label: "Point of sale", icon: ScanBarcode, roles: ["admin", "sales_staff"] as UserRole[] },
+    { to: "/erp/inventory", label: "Inventory", icon: Boxes, roles: ["admin", "sales_staff"] as UserRole[] },
+    { to: "/erp/salon", label: "Salon ops", icon: CalendarHeart, roles: ["admin", "customer_service", "stylist"] as UserRole[] },
+    { to: "/erp/support", label: "Customer service", icon: Headphones, roles: ["admin", "customer_service"] as UserRole[] },
+    { to: "/erp/settings", label: "Settings", icon: Settings, roles: ["admin"] as UserRole[] },
+    { to: "/erp/audit", label: "Audit log", icon: ScrollText, roles: ["admin"] as UserRole[] },
+  ];
+
+  const allowedSections = allSections.filter((sec) => sec.roles.includes(user.role));
+
+  const roleLabelMap: Record<UserRole, string> = {
+    admin: "Administrator",
+    sales_staff: "Sales Executive",
+    customer_service: "Customer Service",
+    stylist: "Salon Stylist",
+    customer: "Customer",
+  };
+
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .substring(0, 2)
+      .toUpperCase();
+  };
 
   return (
     <div className="flex min-h-screen bg-muted/60">
       <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col bg-deep text-deep-foreground md:flex">
         <div className="border-b border-white/10 px-5 py-5">
           <p className="font-display text-xl leading-none">PHILIPO</p>
-          <p className="eyebrow mt-1 text-gold">Staff ERP</p>
+          <p className="eyebrow mt-1 text-gold">Staff ERP · {roleLabelMap[user.role]}</p>
         </div>
         <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-          {sections.map(({ to, label, icon: Icon, ...rest }) => {
+          {allowedSections.map(({ to, label, icon: Icon, ...rest }) => {
             const active = "exact" in rest && rest.exact ? pathname === to : pathname.startsWith(to);
             return (
               <Link
@@ -40,7 +98,7 @@ export function ErpShell() {
                 to={to}
                 className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors ${
                   active
-                    ? "bg-sidebar-accent text-white"
+                    ? "bg-sidebar-accent text-white font-medium"
                     : "text-deep-foreground/70 hover:bg-sidebar-accent/60 hover:text-white"
                 }`}
               >
@@ -50,14 +108,24 @@ export function ErpShell() {
             );
           })}
         </nav>
-        <div className="border-t border-white/10 px-3 py-4">
+        <div className="border-t border-white/10 p-3 space-y-1">
           <Link
             to="/"
-            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-deep-foreground/70 hover:bg-sidebar-accent/60 hover:text-white"
+            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-deep-foreground/70 hover:bg-sidebar-accent/60 hover:text-white"
           >
-            <Store className="size-4.5" />
-            Back to storefront
+            <Store className="size-4" />
+            Storefront
           </Link>
+          <button
+            onClick={() => {
+              signOut();
+              navigate({ to: "/auth" });
+            }}
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-rose/90 hover:bg-rose/20 hover:text-rose"
+          >
+            <LogOut className="size-4" />
+            Sign out
+          </button>
         </div>
       </aside>
 
@@ -65,37 +133,48 @@ export function ErpShell() {
         <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b bg-background/90 px-4 backdrop-blur-md sm:px-6">
           <p className="font-display text-lg text-primary md:hidden">PHILIPO ERP</p>
           <p className="hidden text-sm text-muted-foreground md:block">
-            {BRAND.full} · {BRAND.city} branch
+            {BRAND.full} · {BRAND.city}
           </p>
-          <div className="ml-auto flex items-center gap-2">
+          <div className="ml-auto flex items-center gap-3">
             <button
               aria-label="Notifications"
-              className="relative grid size-10 place-items-center rounded-full hover:bg-secondary"
+              className="relative grid size-9 place-items-center rounded-full hover:bg-secondary"
             >
-              <Bell className="size-4.5" />
+              <Bell className="size-4" />
               <span className="absolute right-1.5 top-1.5 size-2 rounded-full bg-rose" />
             </button>
-            <div className="grid size-9 place-items-center rounded-full bg-primary text-xs font-medium text-primary-foreground">
-              AM
+            <div className="grid size-8 place-items-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
+              {getInitials(user.fullName)}
             </div>
             <div className="hidden text-right sm:block">
-              <p className="text-xs font-medium leading-tight">Amina Mushi</p>
-              <p className="text-[11px] text-muted-foreground">Store manager</p>
+              <p className="text-xs font-medium leading-tight">{user.fullName}</p>
+              <p className="text-[11px] text-muted-foreground">{roleLabelMap[user.role]}</p>
             </div>
+            <button
+              onClick={() => {
+                signOut();
+                navigate({ to: "/auth" });
+              }}
+              title="Sign out"
+              className="grid size-8 place-items-center rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive md:hidden"
+            >
+              <LogOut className="size-4" />
+            </button>
           </div>
         </header>
         <main className="flex-1 px-4 py-6 sm:px-6">
           <Outlet />
         </main>
-        <nav className="sticky bottom-0 z-30 grid grid-cols-5 border-t bg-background/95 backdrop-blur-md md:hidden">
-          {sections.slice(0, 5).map(({ to, label, icon: Icon, ...rest }) => {
+
+        <nav className="sticky bottom-0 z-30 grid grid-cols-4 border-t bg-background/95 backdrop-blur-md md:hidden">
+          {allowedSections.slice(0, 4).map(({ to, label, icon: Icon, ...rest }) => {
             const active = "exact" in rest && rest.exact ? pathname === to : pathname.startsWith(to);
             return (
               <Link
                 key={to}
                 to={to}
                 className={`flex h-14 flex-col items-center justify-center gap-0.5 text-[10px] ${
-                  active ? "text-primary" : "text-muted-foreground"
+                  active ? "text-primary font-medium" : "text-muted-foreground"
                 }`}
               >
                 <Icon className="size-4.5" />
@@ -136,13 +215,13 @@ export function ErpPage({
 
 export function StatusPill({ status }: { status: string }) {
   const tone =
-    status === "Delivered" || status === "Completed" || status === "Confirmed"
-      ? "bg-success/10 text-success"
-      : status === "Refunded" || status === "Deposit due"
+    status === "Delivered" || status === "Completed" || status === "Confirmed" || status === "Paid"
+      ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+      : status === "Refunded" || status === "Cancelled" || status === "Failed"
         ? "bg-destructive/10 text-destructive"
-        : status === "Dispatched" || status === "In chair"
-          ? "bg-info/10 text-info"
-          : "bg-warning/15 text-foreground";
+        : status === "Dispatched" || status === "In chair" || status === "Out for Delivery"
+          ? "bg-sky-500/10 text-sky-700 dark:text-sky-400"
+          : "bg-amber-500/15 text-amber-800 dark:text-amber-300";
   return (
     <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${tone}`}>{status}</span>
   );

@@ -39,7 +39,7 @@ function ProductDetail() {
     <Site>
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
         <nav className="text-xs text-muted-foreground">
-          <Link to="/">Home</Link> / <Link to="/shop">Shop</Link> / {product.category}
+          <Link to="/">Home</Link> / <Link to="/shop" search={{ category: "All" }}>Shop</Link> / {product.category}
         </nav>
 
         <div className="mt-6 grid gap-10 md:grid-cols-2">

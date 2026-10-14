@@ -16,6 +16,7 @@ import { Site } from "@/components/Site";
 import { money, products, BRAND } from "@/data/shop";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { updateUserProfile } from "@/lib/auth-server";
 import { useWishlist } from "@/lib/wishlist";
 
 export const Route = createFileRoute("/account")({
@@ -65,7 +66,7 @@ const input =
   "h-11 w-full rounded-xl border bg-background px-4 text-sm outline-none focus:border-primary";
 
 function Account() {
-  const { user, loading } = useAuth();
+  const { user, loading, updateUser } = useAuth();
   const wishlist = useWishlist();
   const [tab, setTab] = useState<(typeof tabs)[number]["id"]>("orders");
 
@@ -126,10 +127,16 @@ function Account() {
 
   async function saveProfile() {
     if (!user) return;
-    await supabase.from("profiles").update({ full_name: fullName, phone }).eq("id", user.id);
-    setEditingProfile(false);
-    setProfileSaved(true);
-    setTimeout(() => setProfileSaved(false), 2500);
+    try {
+      const updated = await updateUserProfile(user.id, { fullName, phone });
+      updateUser(updated);
+      setEditingProfile(false);
+      setProfileSaved(true);
+      setTimeout(() => setProfileSaved(false), 2500);
+    } catch {
+      // Fallback
+      setEditingProfile(false);
+    }
   }
 
   async function addAddress() {
@@ -265,7 +272,7 @@ function Account() {
                 <p className="text-sm text-muted-foreground">
                   Nothing saved yet — tap the heart on any product to keep it here.
                 </p>
-                <Link to="/shop" className="btn-base btn-outline mt-6 h-10">
+                <Link to="/shop" search={{ category: "All" }} className="btn-base btn-outline mt-6 h-10">
                   Browse products
                 </Link>
               </div>

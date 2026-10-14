@@ -1,32 +1,90 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import type { User } from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
+import type { SessionUser, UserRole } from "./auth-server";
 
 type AuthCtx = {
-  user: User | null;
+  user: SessionUser | null;
   loading: boolean;
+  signIn: (u: SessionUser) => void;
+  signOut: () => void;
+  updateUser: (u: SessionUser) => void;
+  hasRole: (roles: UserRole[]) => boolean;
 };
 
-const Ctx = createContext<AuthCtx>({ user: null, loading: true });
+const Ctx = createContext<AuthCtx>({
+  user: null,
+  loading: true,
+  signIn: () => {},
+  signOut: () => {},
+  updateUser: () => {},
+  hasRole: () => false,
+});
+
+const AUTH_STORAGE_KEY = "philipo_auth_session_v1";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<SessionUser | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setUser(data.session?.user ?? null);
+    try {
+      const stored = localStorage.getItem(AUTH_STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored) as SessionUser;
+        setUser(parsed);
+      } else {
+        // Fallback default admin for instant trial if unauthenticated
+        const defaultAdmin: SessionUser = {
+          id: "u-admin-1",
+          email: "admin@philipo.co.tz",
+          fullName: "Amina Mushi (Admin)",
+          phone: "+255 744 281 673",
+          role: "admin",
+          isActive: true,
+        };
+        setUser(defaultAdmin);
+        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(defaultAdmin));
+      }
+    } catch {
+      setUser(null);
+    } finally {
       setLoading(false);
-    });
-    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-    return () => sub.subscription.unsubscribe();
+    }
   }, []);
 
-  return <Ctx.Provider value={{ user, loading }}>{children}</Ctx.Provider>;
+  const signIn = (u: SessionUser) => {
+    setUser(u);
+    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(u));
+  };
+
+  const signOut = () => {
+    setUser(null);
+    localStorage.removeItem(AUTH_STORAGE_KEY);
+  };
+
+  const updateUser = (u: SessionUser) => {
+    setUser(u);
+    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(u));
+  };
+
+  const checkRole = (roles: UserRole[]) => {
+    if (!user || !user.isActive) return false;
+    return roles.includes(user.role);
+  };
+
+  return (
+    <Ctx.Provider
+      value={{
+        user,
+        loading,
+        signIn,
+        signOut,
+        updateUser,
+        hasRole: checkRole,
+      }}
+    >
+      {children}
+    </Ctx.Provider>
+  );
 }
 
 export function useAuth() {
