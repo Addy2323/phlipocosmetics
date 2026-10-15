@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Check, Clock, Star, CalendarHeart, Loader2 } from "lucide-react";
-import salonImg from "@/assets/salon.jpg";
+import salonImg from "@/assets/salon/salon.jpg";
 import { Site } from "@/components/Site";
 import { salonServices, stylists, timeSlots, money, BRAND } from "@/data/shop";
 import { useAuth } from "@/lib/auth";

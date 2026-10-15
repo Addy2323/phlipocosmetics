@@ -38,7 +38,7 @@ export function ErpShell() {
             Staff authorization is required to view the ERP & business control center.
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
-            <Link to="/auth" className="btn-base btn-primary">
+            <Link to="/login" className="btn-base btn-primary">
               Sign in with staff account
             </Link>
             <Link to="/" className="btn-base btn-outline">
@@ -85,9 +85,11 @@ export function ErpShell() {
   return (
     <div className="flex min-h-screen bg-muted/60">
       <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col bg-deep text-deep-foreground md:flex">
-        <div className="border-b border-white/10 px-5 py-5">
-          <p className="font-display text-xl leading-none">PHILIPO</p>
-          <p className="eyebrow mt-1 text-gold">Staff ERP · {roleLabelMap[user.role]}</p>
+        <div className="border-b border-white/10 px-5 py-4">
+          <Link to="/" className="inline-block rounded-lg bg-white p-1.5 shadow-sm">
+            <img src="/logo.png" alt="Philipo Cosmetics" className="h-8 w-auto object-contain" />
+          </Link>
+          <p className="eyebrow mt-2 text-gold">Staff ERP · {roleLabelMap[user.role]}</p>
         </div>
         <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
           {allowedSections.map(({ to, label, icon: Icon, ...rest }) => {
@@ -98,7 +100,7 @@ export function ErpShell() {
                 to={to}
                 className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors ${
                   active
-                    ? "bg-sidebar-accent text-white font-medium"
+                    ? "bg-sidebar-accent text-white font-medium shadow-sm"
                     : "text-deep-foreground/70 hover:bg-sidebar-accent/60 hover:text-white"
                 }`}
               >
@@ -119,9 +121,9 @@ export function ErpShell() {
           <button
             onClick={() => {
               signOut();
-              navigate({ to: "/auth" });
+              navigate({ to: "/login" });
             }}
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-rose/90 hover:bg-rose/20 hover:text-rose"
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-rose hover:bg-rose/20 hover:text-rose transition-colors"
           >
             <LogOut className="size-4" />
             Sign out
@@ -130,10 +132,15 @@ export function ErpShell() {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b bg-background/90 px-4 backdrop-blur-md sm:px-6">
-          <p className="font-display text-lg text-primary md:hidden">PHILIPO ERP</p>
-          <p className="hidden text-sm text-muted-foreground md:block">
-            {BRAND.full} · {BRAND.city}
+        <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-border bg-background/90 px-4 backdrop-blur-md sm:px-6">
+          <div className="flex items-center gap-2 md:hidden">
+            <Link to="/">
+              <img src="/logo.png" alt="Philipo Cosmetics" className="h-7 w-auto object-contain" />
+            </Link>
+            <span className="text-xs font-semibold text-primary">ERP</span>
+          </div>
+          <p className="hidden text-xs text-muted-foreground md:block">
+            {BRAND.full} · Enterprise Operations Center
           </p>
           <div className="ml-auto flex items-center gap-3">
             <button
@@ -153,7 +160,7 @@ export function ErpShell() {
             <button
               onClick={() => {
                 signOut();
-                navigate({ to: "/auth" });
+                navigate({ to: "/login" });
               }}
               title="Sign out"
               className="grid size-8 place-items-center rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive md:hidden"

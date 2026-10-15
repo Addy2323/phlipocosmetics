@@ -2,6 +2,10 @@ import serum from "@/assets/p-serum.jpg";
 import lipstick from "@/assets/p-lipstick.jpg";
 import hairoil from "@/assets/p-hairoil.jpg";
 import cream from "@/assets/p-cream.jpg";
+import catSkincare from "@/assets/skincare/cat-skincare.jpg";
+import catMakeup from "@/assets/makeup/cat-makeup.jpg";
+import catHair from "@/assets/hair-care/cat-hair.jpg";
+import catFragrance from "@/assets/fragrance/cat-fragrance.jpg";
 
 export const BRAND = {
   name: "Philipo Cosmetics",
@@ -107,15 +111,71 @@ export const products: Product[] = [
       "A rich but breathable day cream with a soft-focus finish, layered beautifully under makeup.",
     details: ["50 ml jar", "Hyaluronic acid", "SPF free — layer with sunscreen", "Refillable"],
   },
+  {
+    id: "P-1005",
+    slug: "zanzibar-amber-eau-de-parfum",
+    name: "Zanzibar Amber Eau de Parfum",
+    tagline: "Warm Amber · Vanilla · Spiced Clove",
+    category: "Fragrance",
+    price: 115000,
+    compareAt: 135000,
+    rating: 5.0,
+    reviews: 47,
+    stock: 19,
+    reserved: 1,
+    sku: "PC-FRG-0021",
+    image: catFragrance,
+    badge: "New arrival",
+    description:
+      "An evocative coastal fragrance marrying warm amber, sweet clove blossoms and creamy Madagascar vanilla with an enduring 12-hour silage.",
+    details: ["50 ml glass flacon", "Eau de parfum concentration", "Artisanal small batch", "Cruelty free"],
+  },
 ];
 
 const countFor = (name: string) => products.filter((p) => p.category === name).length;
 
-export const categories = [
-  { name: "Skincare", count: countFor("Skincare"), tint: "from-[#8B123F] to-[#B51658]" },
-  { name: "Makeup", count: countFor("Makeup"), tint: "from-[#C2185B] to-[#8B123F]" },
-  { name: "Hair", count: countFor("Hair"), tint: "from-[#260713] to-[#8B123F]" },
-  { name: "Fragrance", count: countFor("Fragrance"), tint: "from-[#6D0D31] to-[#C2185B]" },
+export type CategoryItem = {
+  name: string;
+  title: string;
+  count: number;
+  image: string;
+  description: string;
+  tint: string;
+};
+
+export const categories: CategoryItem[] = [
+  {
+    name: "Skincare",
+    title: "Skincare",
+    count: countFor("Skincare"),
+    image: catSkincare,
+    description: "Hydrating serums, replenishing creams & barrier protection",
+    tint: "from-[#172459]/90 via-[#243B90]/70 to-transparent",
+  },
+  {
+    name: "Makeup",
+    title: "Makeup",
+    count: countFor("Makeup"),
+    image: catMakeup,
+    description: "Velvety matte pigments, lipsticks & flawless finishes",
+    tint: "from-[#243B90]/90 via-[#EC008C]/60 to-transparent",
+  },
+  {
+    name: "Hair",
+    title: "Hair Care",
+    count: countFor("Hair"),
+    image: catHair,
+    description: "Nourishing argan oils, edge control & salon treatments",
+    tint: "from-[#172459]/90 via-[#C6A56B]/60 to-transparent",
+  },
+  {
+    name: "Fragrance",
+    title: "Fragrances",
+    count: countFor("Fragrance"),
+    image: catFragrance,
+    description: "Artisanal coastal perfumes & sensual amber elixirs",
+    tint: "from-[#EC008C]/90 via-[#C6A56B]/60 to-transparent",
+  },
 ];
 
 export const salonServices = [

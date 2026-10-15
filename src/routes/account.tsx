@@ -16,7 +16,7 @@ import { Site } from "@/components/Site";
 import { money, products, BRAND } from "@/data/shop";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { updateUserProfile } from "@/lib/auth-server";
+import { updateUserProfileClient } from "@/lib/auth-client";
 import { useWishlist } from "@/lib/wishlist";
 
 export const Route = createFileRoute("/account")({
@@ -108,9 +108,14 @@ function Account() {
               See your orders, bookings, wishlist and saved addresses — and keep your bag in sync
               across devices.
             </p>
-            <Link to="/auth" className="btn-base btn-primary mt-8 h-12 w-full">
-              Sign in or create account
-            </Link>
+            <div className="mt-8 flex flex-col gap-2.5">
+              <Link to="/login" className="btn-base btn-primary h-12 w-full">
+                Sign In
+              </Link>
+              <Link to="/register" className="btn-base btn-outline h-12 w-full">
+                Create Account
+              </Link>
+            </div>
           </div>
         </div>
       </Site>
@@ -128,7 +133,7 @@ function Account() {
   async function saveProfile() {
     if (!user) return;
     try {
-      const updated = await updateUserProfile(user.id, { fullName, phone });
+      const updated = await updateUserProfileClient(user.id, { fullName, phone });
       updateUser(updated);
       setEditingProfile(false);
       setProfileSaved(true);

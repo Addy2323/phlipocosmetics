@@ -15,6 +15,8 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CartRouteImport } from './routes/cart'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as ErpRouteImport } from './routes/erp'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as RegisterRouteImport } from './routes/register'
 import { Route as SalonRouteImport } from './routes/salon'
 import { Route as ShopRouteImport } from './routes/shop'
 import { Route as TrackRouteImport } from './routes/track'
@@ -57,6 +59,16 @@ const CheckoutRoute = CheckoutRouteImport.update({
 const ErpRoute = ErpRouteImport.update({
   id: '/erp',
   path: '/erp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SalonRoute = SalonRouteImport.update({
@@ -132,6 +144,8 @@ export interface FileRoutesByFullPath {
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/erp': typeof ErpRouteWithChildren
+  '/login': typeof LoginRoute
+  '/register': typeof RegisterRoute
   '/salon': typeof SalonRoute
   '/shop': typeof ShopRoute
   '/track': typeof TrackRoute
@@ -152,6 +166,8 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
+  '/login': typeof LoginRoute
+  '/register': typeof RegisterRoute
   '/salon': typeof SalonRoute
   '/shop': typeof ShopRoute
   '/track': typeof TrackRoute
@@ -174,6 +190,8 @@ export interface FileRoutesById {
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/erp': typeof ErpRouteWithChildren
+  '/login': typeof LoginRoute
+  '/register': typeof RegisterRoute
   '/salon': typeof SalonRoute
   '/shop': typeof ShopRoute
   '/track': typeof TrackRoute
@@ -197,6 +215,8 @@ export interface FileRouteTypes {
     | '/cart'
     | '/checkout'
     | '/erp'
+    | '/login'
+    | '/register'
     | '/salon'
     | '/shop'
     | '/track'
@@ -217,6 +237,8 @@ export interface FileRouteTypes {
     | '/auth'
     | '/cart'
     | '/checkout'
+    | '/login'
+    | '/register'
     | '/salon'
     | '/shop'
     | '/track'
@@ -238,6 +260,8 @@ export interface FileRouteTypes {
     | '/cart'
     | '/checkout'
     | '/erp'
+    | '/login'
+    | '/register'
     | '/salon'
     | '/shop'
     | '/track'
@@ -260,6 +284,8 @@ export interface RootRouteChildren {
   CartRoute: typeof CartRoute
   CheckoutRoute: typeof CheckoutRoute
   ErpRoute: typeof ErpRouteWithChildren
+  LoginRoute: typeof LoginRoute
+  RegisterRoute: typeof RegisterRoute
   SalonRoute: typeof SalonRoute
   ShopRoute: typeof ShopRoute
   TrackRoute: typeof TrackRoute
@@ -308,6 +334,20 @@ declare module '@tanstack/react-router' {
       path: '/erp'
       fullPath: '/erp'
       preLoaderRoute: typeof ErpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/salon': {
@@ -437,6 +477,8 @@ const rootRouteChildren: RootRouteChildren = {
   CartRoute: CartRoute,
   CheckoutRoute: CheckoutRoute,
   ErpRoute: ErpRouteWithChildren,
+  LoginRoute: LoginRoute,
+  RegisterRoute: RegisterRoute,
   SalonRoute: SalonRoute,
   ShopRoute: ShopRoute,
   TrackRoute: TrackRoute,

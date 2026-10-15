@@ -32,17 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const parsed = JSON.parse(stored) as SessionUser;
         setUser(parsed);
       } else {
-        // Fallback default admin for instant trial if unauthenticated
-        const defaultAdmin: SessionUser = {
-          id: "u-admin-1",
-          email: "admin@philipo.co.tz",
-          fullName: "Amina Mushi (Admin)",
-          phone: "+255 744 281 673",
-          role: "admin",
-          isActive: true,
-        };
-        setUser(defaultAdmin);
-        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(defaultAdmin));
+        setUser(null);
       }
     } catch {
       setUser(null);
