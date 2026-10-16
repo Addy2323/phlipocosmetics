@@ -37,7 +37,9 @@ function Pos() {
         : [...ls, { id, qty: 1 }];
     });
   const setQty = (id: string, qty: number) =>
-    setLines((ls) => (qty <= 0 ? ls.filter((l) => l.id !== id) : ls.map((l) => (l.id === id ? { ...l, qty } : l))));
+    setLines((ls) =>
+      qty <= 0 ? ls.filter((l) => l.id !== id) : ls.map((l) => (l.id === id ? { ...l, qty } : l)),
+    );
 
   const charge = () => {
     toast.success(`Sale complete — ${money(total)}. Receipt printed, stock updated.`);
@@ -63,7 +65,12 @@ function Pos() {
               onClick={() => add(p.id)}
               className="card-surface hover-lift overflow-hidden text-left"
             >
-              <img src={p.image} alt={p.name} loading="lazy" className="aspect-square w-full object-cover" />
+              <img
+                src={p.image}
+                alt={p.name}
+                loading="lazy"
+                className="aspect-square w-full object-cover"
+              />
               <div className="p-3">
                 <p className="truncate text-sm font-medium">{p.name}</p>
                 <p className="mt-0.5 text-xs text-muted-foreground">{p.sku}</p>
@@ -134,7 +141,9 @@ function Pos() {
             />
           </label>
           {Number(tendered) > total && total > 0 && (
-            <p className="mt-2 text-xs text-success">Change due: {money(Number(tendered) - total)}</p>
+            <p className="mt-2 text-xs text-success">
+              Change due: {money(Number(tendered) - total)}
+            </p>
           )}
 
           <div className="mt-4 grid grid-cols-2 gap-2">

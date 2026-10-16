@@ -297,6 +297,8 @@ export function Site({ children }: { children: ReactNode }) {
     { to: "/shop", search: { category: "Makeup" }, label: "Makeup" },
     { to: "/shop", search: { category: "Hair" }, label: "Hair Care" },
     { to: "/shop", search: { category: "Fragrance" }, label: "Fragrances" },
+    { to: "/shop", search: { category: "Body Oils" }, label: "Body Oils" },
+    { to: "/shop", search: { category: "Soaps" }, label: "Soaps" },
   ];
 
   /* Derive first name for greeting */
@@ -308,59 +310,63 @@ export function Site({ children }: { children: ReactNode }) {
       {/* MOBILE HEADER — visible < md */}
       {/* ═══════════════════════════════════════════════════════ */}
       <header className="philipo-mobile-header sticky top-0 z-40 md:hidden bg-background/98 backdrop-blur-lg border-b border-border/60">
-        <div className="flex items-center justify-between px-4 py-3">
+        <div className="flex items-center justify-between px-4 py-2.5">
           {/* Left: Menu + Greeting */}
           <div className="flex items-center gap-3 min-w-0">
             <button
               onClick={() => setMobileMenuOpen(true)}
               aria-label="Open navigation menu"
-              className="grid size-10 shrink-0 place-items-center rounded-xl bg-secondary/80 hover:bg-secondary transition-colors"
+              className="grid size-10 shrink-0 place-items-center rounded-xl bg-white border border-border/80 shadow-2xs hover:bg-secondary transition-colors active:scale-95"
             >
               <Menu className="size-5 text-foreground" />
             </button>
             <div className="min-w-0">
-              <p className="text-xs text-muted-foreground truncate leading-tight">
+              <p className="text-[11px] text-muted-foreground truncate leading-tight flex items-center gap-1 font-medium">
                 {firstName ? (
                   <>Hello, {firstName}! ✨</>
                 ) : (
                   <>Welcome to Philipo Cosmetics ✨</>
                 )}
               </p>
-              <h1 className="text-base font-display font-semibold text-[#243B90] leading-tight tracking-tight">
+              <h1 className="text-lg font-display font-bold text-[#243B90] leading-tight tracking-tight">
                 Discover Beauty
               </h1>
+              <p className="text-[10px] text-[#77747C] leading-tight truncate">
+                Premium beauty, just for you
+              </p>
             </div>
           </div>
 
           {/* Right: Search, Notifications, Cart */}
-          <div className="flex items-center gap-1 shrink-0">
+          <div className="flex items-center gap-1.5 shrink-0">
             <button
               onClick={() => setSearchOpen(true)}
               aria-label="Search"
-              className="grid size-10 place-items-center rounded-xl hover:bg-secondary transition-colors"
+              className="grid size-10 place-items-center rounded-xl bg-white border border-border/80 shadow-2xs hover:bg-secondary transition-colors active:scale-95"
             >
               <Search className="size-[18px] text-foreground/80" />
             </button>
             <button
               onClick={() => setNotifOpen(true)}
               aria-label="Notifications"
-              className="relative grid size-10 place-items-center rounded-xl hover:bg-secondary transition-colors"
+              className="relative grid size-10 place-items-center rounded-xl bg-white border border-border/80 shadow-2xs hover:bg-secondary transition-colors active:scale-95"
             >
               <Bell className="size-[18px] text-foreground/80" />
-              {/* Badge shown only when there are unread notifications */}
+              {/* Unread notification indicator dot */}
+              <span className="absolute top-2.5 right-2.5 size-2 rounded-full bg-[#EC008C] ring-2 ring-white" />
             </button>
-            <button
-              onClick={() => setDrawerOpen(true)}
-              aria-label={`Shopping bag, ${count} items`}
-              className="relative grid size-10 place-items-center rounded-xl hover:bg-secondary transition-colors"
+            <Link
+              to="/cart"
+              aria-label={`Shopping Cart, ${count} items`}
+              className="relative grid size-10 place-items-center rounded-xl bg-white border border-border/80 shadow-2xs hover:bg-secondary transition-colors active:scale-95"
             >
               <ShoppingBag className="size-[18px] text-foreground/80" />
               {count > 0 && (
-                <span className="absolute -right-0.5 -top-0.5 grid size-[18px] place-items-center rounded-full bg-[#EC008C] text-[10px] font-bold text-white shadow-sm">
-                  {count > 9 ? "9+" : count}
+                <span className="absolute -right-1 -top-1 grid size-5 place-items-center rounded-full bg-[#EC008C] text-[10px] font-bold text-white shadow-sm ring-2 ring-white">
+                  {count > 99 ? "99+" : count}
                 </span>
               )}
-            </button>
+            </Link>
           </div>
         </div>
       </header>
@@ -415,16 +421,6 @@ export function Site({ children }: { children: ReactNode }) {
               Shop All
             </Link>
 
-            {categoryLinks.map((cat) => (
-              <Link
-                key={cat.label}
-                to={cat.to}
-                search={cat.search}
-                className="rounded-full px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-primary"
-              >
-                {cat.label}
-              </Link>
-            ))}
 
             <Link
               to="/salon"
@@ -506,12 +502,12 @@ export function Site({ children }: { children: ReactNode }) {
             )}
 
             {/* Staff ERP shortcut */}
-            {user && (user.role === "admin" || user.role === "sales_staff" || user.role === "customer_service" || user.role === "stylist") && (
+            {user && (user.role === "admin" || user.role === "sales" || user.role === "sales_staff") && (
               <Link
-                to="/erp"
+                to={user.role === "admin" ? "/admin/dashboard" : "/sales/dashboard"}
                 className="hidden lg:inline-flex items-center rounded-full bg-primary/10 border border-primary/20 px-3.5 py-1.5 text-xs font-medium text-primary hover:bg-primary hover:text-white transition-colors"
               >
-                Staff ERP
+                Staff Portal
               </Link>
             )}
           </div>
@@ -687,6 +683,8 @@ export function Site({ children }: { children: ReactNode }) {
                 <li><Link to="/shop" search={{ category: "Makeup" }} className="hover:text-gold transition-colors">Lip & Face Makeup</Link></li>
                 <li><Link to="/shop" search={{ category: "Hair" }} className="hover:text-gold transition-colors">Hair Oils & Treatments</Link></li>
                 <li><Link to="/shop" search={{ category: "Fragrance" }} className="hover:text-gold transition-colors">Signature Fragrances</Link></li>
+                <li><Link to="/shop" search={{ category: "Body Oils" }} className="hover:text-gold transition-colors">Body Oils & Shimmers</Link></li>
+                <li><Link to="/shop" search={{ category: "Soaps" }} className="hover:text-gold transition-colors">Artisanal Soaps</Link></li>
               </ul>
             </div>
 

@@ -16,7 +16,7 @@ export async function seedDatabase() {
   console.log("Seeding Philipo Cosmetics database tables...");
 
   // 1. Create tables if not existing via raw Drizzle DDL
-  await queryClient`
+  await queryClient.unsafe(`
     CREATE TABLE IF NOT EXISTS users (
       id VARCHAR(36) PRIMARY KEY,
       email VARCHAR(255) NOT NULL UNIQUE,
@@ -136,13 +136,27 @@ export async function seedDatabase() {
       created_at TIMESTAMP NOT NULL DEFAULT NOW()
     );
 
+    CREATE TABLE IF NOT EXISTS salon_categories (
+      id VARCHAR(36) PRIMARY KEY,
+      name VARCHAR(255) NOT NULL,
+      slug VARCHAR(100) NOT NULL UNIQUE,
+      description TEXT,
+      starting_price INTEGER NOT NULL DEFAULT 0,
+      image TEXT,
+      "order" INTEGER NOT NULL DEFAULT 0,
+      is_active BOOLEAN NOT NULL DEFAULT true
+    );
+
     CREATE TABLE IF NOT EXISTS salon_services (
       id VARCHAR(36) PRIMARY KEY,
+      category_id VARCHAR(36) REFERENCES salon_categories(id),
       name VARCHAR(255) NOT NULL,
       duration VARCHAR(50) NOT NULL,
       duration_minutes INTEGER NOT NULL DEFAULT 60,
       price INTEGER NOT NULL,
       description TEXT,
+      image TEXT,
+      requirements TEXT,
       is_active BOOLEAN NOT NULL DEFAULT true
     );
 
@@ -159,13 +173,22 @@ export async function seedDatabase() {
       id VARCHAR(36) PRIMARY KEY,
       customer_name VARCHAR(255) NOT NULL,
       customer_phone VARCHAR(50) NOT NULL,
+      customer_email VARCHAR(255),
+      category_id VARCHAR(36),
+      category_name VARCHAR(255),
       service_id VARCHAR(36) NOT NULL REFERENCES salon_services(id),
       service_name VARCHAR(255) NOT NULL,
       stylist_id VARCHAR(36) NOT NULL REFERENCES salon_stylists(id),
       stylist_name VARCHAR(255) NOT NULL,
       appointment_date VARCHAR(50) NOT NULL,
       time_slot VARCHAR(20) NOT NULL,
-      status VARCHAR(50) NOT NULL DEFAULT 'Confirmed',
+      end_time VARCHAR(20),
+      duration VARCHAR(50),
+      status VARCHAR(50) NOT NULL DEFAULT 'CONFIRMED',
+      payment_status VARCHAR(50) NOT NULL DEFAULT 'SUCCESSFUL',
+      payment_method VARCHAR(50) NOT NULL DEFAULT 'momo',
+      payment_reference VARCHAR(255),
+      amount_paid INTEGER DEFAULT 0,
       notes TEXT,
       price INTEGER NOT NULL,
       created_at TIMESTAMP NOT NULL DEFAULT NOW()
@@ -197,7 +220,7 @@ export async function seedDatabase() {
       value TEXT NOT NULL,
       updated_at TIMESTAMP NOT NULL DEFAULT NOW()
     );
-  `;
+  `);
 
   // Seed default staff accounts if missing
   const defaultAccounts = [
@@ -339,13 +362,54 @@ export async function seedDatabase() {
     }
   }
 
-  // Seed salon services
+  // Seed salon categories
+  const defaultCategories = [
+    { id: "CAT-1", name: "Hair Styling", slug: "hair-styling", description: "Braids, cornrows, wigs, and modern styles.", startingPrice: 30000, order: 1, image: "/assets/salon/category-hair-styling.jpg" },
+    { id: "CAT-2", name: "Hair Straightening", slug: "hair-straightening", description: "Smooth and sleek hair solutions.", startingPrice: 50000, order: 2, image: "/assets/salon/category-hair-straightening.jpg" },
+    { id: "CAT-3", name: "Hair Braiding", slug: "hair-braiding", description: "Traditional and modern braids.", startingPrice: 25000, order: 3, image: "/assets/salon/category-hair-braiding.jpg" },
+    { id: "CAT-4", name: "Hair Design", slug: "hair-design", description: "Custom styles for every occasion.", startingPrice: 40000, order: 4, image: "/assets/salon/category-hair-design.jpg" },
+    { id: "CAT-5", name: "Hair Treatment", slug: "hair-treatment", description: "Nourish, repair and restore.", startingPrice: 35000, order: 5, image: "/assets/salon/category-hair-treatment.jpg" },
+    { id: "CAT-6", name: "Washing & Blow-Dry", slug: "washing-blow-dry", description: "Clean, fresh and styled.", startingPrice: 20000, order: 6, image: "/assets/salon/category-washing-blowdry.jpg" },
+    { id: "CAT-7", name: "Makeup", slug: "makeup", description: "Look your best for any event.", startingPrice: 30000, order: 7, image: "/assets/salon/category-makeup.jpg" },
+  ];
+
+  for (const cat of defaultCategories) {
+    const existing = await db.select().from(schema.salonCategories).where(eq(schema.salonCategories.id, cat.id));
+    if (existing.length === 0) {
+      await db.insert(schema.salonCategories).values(cat);
+    }
+  }
+
+  // Seed salon services matching reference screenshots
   const defaultServices = [
-    { id: "S-1", name: "Signature Braiding", duration: "3 h 30 min", durationMinutes: 210, price: 85000, description: "Knotless, box, or tribal braids with premium scalp therapy." },
-    { id: "S-2", name: "Silk Press & Style", duration: "1 h 30 min", durationMinutes: 90, price: 45000, description: "Hydrating wash, blow out, thermal press, and split end trim." },
-    { id: "S-3", name: "Deep Conditioning Ritual", duration: "50 min", durationMinutes: 50, price: 30000, description: "Steam treatment with argan oil mask for soft strength." },
-    { id: "S-4", name: "Bridal Hair & Makeup", duration: "4 h", durationMinutes: 240, price: 250000, description: "Full bridal makeover with trial and premium eyelash installation." },
-    { id: "S-5", name: "Colour & Gloss", duration: "2 h", durationMinutes: 120, price: 120000, description: "Custom tinting and high-shine gloss formula." },
+    // Hair Styling (CAT-1)
+    { id: "S-KNOTLESS", categoryId: "CAT-1", name: "Knotless Braids", duration: "2 hours", durationMinutes: 120, price: 35000, description: "Lightweight, natural look.", image: "/assets/salon/service-knotless-braids.jpg", requirements: "Hair must be washed or book wash service." },
+    { id: "S-CORNROWS", categoryId: "CAT-1", name: "Cornrows", duration: "1 hour", durationMinutes: 60, price: 25000, description: "Classic and stylish.", image: "/assets/salon/service-cornrows.jpg", requirements: "Clean scalp recommended." },
+    { id: "S-WIGINSTALL", categoryId: "CAT-1", name: "Wig Installation", duration: "2 hours", durationMinutes: 120, price: 50000, description: "Professional and secure.", image: "/assets/salon/service-wig-install.jpg", requirements: "Bring your lace wig 24h prior for customization." },
+    
+    // Hair Straightening (CAT-2)
+    { id: "S-SILKPRESS", categoryId: "CAT-2", name: "Silk Press & Flat Iron", duration: "1 h 30 min", durationMinutes: 90, price: 50000, description: "Thermal straightening with moisture shield.", image: "/assets/salon/category-hair-straightening.jpg" },
+    { id: "S-KERATIN", categoryId: "CAT-2", name: "Keratin Gloss Treatment", duration: "2 h 30 min", durationMinutes: 150, price: 120000, description: "Frizz elimination and diamond shine.", image: "/assets/salon/category-hair-straightening.jpg" },
+
+    // Hair Braiding (CAT-3)
+    { id: "S-BOXBRAIDS", categoryId: "CAT-3", name: "Classic Box Braids", duration: "2 h 30 min", durationMinutes: 150, price: 35000, description: "Precision parted traditional box braids.", image: "/assets/salon/category-hair-braiding.jpg" },
+    { id: "S-TRIBALBRAIDS", categoryId: "CAT-3", name: "Tribal Fulani Braids", duration: "3 hours", durationMinutes: 180, price: 45000, description: "Artistic center-part braids with bead accents.", image: "/assets/salon/category-hair-braiding.jpg" },
+
+    // Hair Design (CAT-4)
+    { id: "S-SCULPTEDUPDO", categoryId: "CAT-4", name: "Sculpted Updo", duration: "1 h 30 min", durationMinutes: 90, price: 40000, description: "Elegantly pinned gala or event architectural style.", image: "/assets/salon/category-hair-design.jpg" },
+    { id: "S-BRIDALHAIR", categoryId: "CAT-4", name: "Bridal Hair Architecture", duration: "3 hours", durationMinutes: 180, price: 150000, description: "Exclusive wedding styling and veil placement.", image: "/assets/salon/category-hair-design.jpg" },
+
+    // Hair Treatment (CAT-5)
+    { id: "S-DEEPSTEAM", categoryId: "CAT-5", name: "Deep Conditioning & Steam", duration: "50 min", durationMinutes: 50, price: 35000, description: "Nourish, repair and restore moisture balance.", image: "/assets/salon/category-hair-treatment.jpg" },
+    { id: "S-PROTEINTHERAPY", categoryId: "CAT-5", name: "Protein Barrier Therapy", duration: "1 h 15 min", durationMinutes: 75, price: 45000, description: "Strengthening treatment for damaged strands.", image: "/assets/salon/category-hair-treatment.jpg" },
+
+    // Washing & Blow-Dry (CAT-6)
+    { id: "S-WASHBLOW", categoryId: "CAT-6", name: "Hydrating Wash & Blow-Dry", duration: "45 min", durationMinutes: 45, price: 20000, description: "Clean, fresh and styled blow-out.", image: "/assets/salon/category-washing-blowdry.jpg" },
+    { id: "S-WASHTRIM", categoryId: "CAT-6", name: "Wash, Trim & Deluxe Blowout", duration: "1 hour", durationMinutes: 60, price: 30000, description: "Purifying wash, precision dusting, and soft bounce.", image: "/assets/salon/category-washing-blowdry.jpg" },
+
+    // Makeup (CAT-7)
+    { id: "S-SOFTGLAM", categoryId: "CAT-7", name: "Full Soft Glam Makeup", duration: "1 h 15 min", durationMinutes: 75, price: 30000, description: "Look your best for any event with velvety skin finish.", image: "/assets/salon/category-makeup.jpg" },
+    { id: "S-BRIDALGLAM", categoryId: "CAT-7", name: "Luxury Bridal Glam", duration: "2 hours", durationMinutes: 120, price: 95000, description: "High-definition longwear bridal makeup with lashes.", image: "/assets/salon/category-makeup.jpg" },
   ];
 
   for (const s of defaultServices) {
@@ -355,11 +419,12 @@ export async function seedDatabase() {
     }
   }
 
-  // Seed salon stylists
+  // Seed salon stylists (featuring Jane M. from Screenshot 4)
   const defaultStylists = [
-    { id: "ST-1", name: "Amina Mushi", phone: "+255 744 281 673", skills: "Braiding · Colour", rating: "4.90" },
-    { id: "ST-2", name: "Grace Kilonzo", phone: "+255 744 281 676", skills: "Silk press · Bridal", rating: "4.80" },
-    { id: "ST-3", name: "Neema Joseph", phone: "+255 744 281 677", skills: "Natural hair · Treatments", rating: "4.90" },
+    { id: "ST-1", name: "Jane M.", phone: "+255 712 345 678", skills: "Braiding · Wigs · Modern Styles", rating: "4.95" },
+    { id: "ST-2", name: "Amina Mushi", phone: "+255 744 281 673", skills: "Braiding · Colour", rating: "4.90" },
+    { id: "ST-3", name: "Grace Kilonzo", phone: "+255 744 281 676", skills: "Silk press · Bridal", rating: "4.85" },
+    { id: "ST-4", name: "Neema Joseph", phone: "+255 744 281 677", skills: "Natural hair · Treatments", rating: "4.90" },
   ];
 
   for (const st of defaultStylists) {

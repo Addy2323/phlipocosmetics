@@ -1,19 +1,40 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
-import { Check, CreditCard, Smartphone, Banknote, Loader2, AlertCircle, ShieldCheck, Truck, Lock } from "lucide-react";
+import {
+  Check,
+  CreditCard,
+  Smartphone,
+  Banknote,
+  Loader2,
+  AlertCircle,
+  ShieldCheck,
+  Truck,
+  Lock,
+} from "lucide-react";
 import { Site } from "@/components/Site";
 import { money, BRAND } from "@/data/shop";
 import { useCart } from "@/lib/cart";
 import { useAuth } from "@/lib/auth";
 import { createOrderFromCart } from "@/lib/order-server";
+import { saveStoredOrder } from "@/lib/orders-store";
+import { createInvoiceFromOrder, Invoice } from "@/lib/invoices-store";
+import { downloadInvoicePDF } from "@/lib/invoice-pdf";
+import { InvoiceModal } from "@/components/admin/InvoiceModal";
+import { FileText, Download } from "lucide-react";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
     meta: [
       { title: "Secure Checkout — Philipo Cosmetics" },
-      { name: "description", content: "Complete your luxury beauty order with mobile money, card, or cash on delivery." },
+      {
+        name: "description",
+        content: "Complete your luxury beauty order with mobile money, card, or cash on delivery.",
+      },
       { property: "og:title", content: "Checkout — Philipo Cosmetics" },
-      { property: "og:description", content: "Pay by M-Pesa, Tigo Pesa, Airtel Money, card, or cash on delivery." },
+      {
+        property: "og:description",
+        content: "Pay by M-Pesa, Tigo Pesa, Airtel Money, card, or cash on delivery.",
+      },
     ],
   }),
   component: Checkout,
@@ -120,6 +141,38 @@ function Checkout() {
       });
 
       setCreatedOrderNumber(result.orderNumber);
+
+      const createdOrderRecord = {
+        id: result.order?.id || result.orderNumber || `ORD-${Date.now()}`,
+        orderNumber: result.orderNumber,
+        customerName: fullName.trim() || "Guest Client",
+        customerPhone: phone.trim() || "0744000111",
+        destination: `${area}, ${city}`,
+        items: detailed.map((d) => ({ name: d.product.name, qty: d.qty, price: d.product.price, sku: d.product.sku })),
+        total: grandTotal,
+        paymentMethod:
+          pay === "momo"
+            ? "Mobile Money"
+            : pay === "card"
+              ? "Credit/Debit Card"
+              : "Cash on Delivery",
+        paymentStatus: pay === "cod" ? "Pending COD" : "Paid",
+        fulfillmentStatus: "Processing",
+        channel: "Online" as const,
+        createdAt: new Date().toISOString(),
+      };
+
+      // Persist to unified store orders ledger
+      saveStoredOrder(createdOrderRecord);
+
+      // Automatic Tax Invoice Generation
+      const inv = createInvoiceFromOrder({
+        ...createdOrderRecord,
+        customerEmail: user?.email,
+        userId: user?.id,
+      });
+      setCurrentInvoice(inv);
+
       setState("done");
       clear();
     } catch (err: any) {
@@ -128,6 +181,9 @@ function Checkout() {
       setState("error");
     }
   }
+
+  const [invoiceModalOpen, setInvoiceModalOpen] = useState(false);
+  const [currentInvoice, setCurrentInvoice] = useState<Invoice | null>(null);
 
   if (state === "done") {
     return (
@@ -141,17 +197,66 @@ function Checkout() {
           </p>
           <h1 className="mt-2 font-display text-4xl sm:text-5xl">Thank You for Your Order!</h1>
           <p className="mt-4 text-sm text-muted-foreground leading-relaxed">
-            Your beauty order <strong className="text-foreground">{createdOrderNumber}</strong> is confirmed.
-            An automated SMS order receipt and dispatch notification has been sent to{" "}
-            <strong className="text-foreground">{phone}</strong>. Our courier team will contact you prior to arrival.
+            Your beauty order <strong className="text-foreground">{createdOrderNumber}</strong> is
+            confirmed. An automated SMS order receipt and dispatch notification has been sent to{" "}
+            <strong className="text-foreground">{phone}</strong>.
           </p>
 
-          <div className="mt-8 rounded-2xl bg-secondary/40 p-5 text-left border border-border text-xs text-muted-foreground space-y-1.5">
+          <div className="mt-6 rounded-2xl bg-secondary/40 p-5 text-left border border-border text-xs text-muted-foreground space-y-1.5">
             <p className="font-semibold text-foreground">Delivery Destination:</p>
-            <p>{fullName} · {phone}</p>
-            <p>{area}, {city}, Tanzania</p>
-            <p className="pt-1 text-primary font-medium">Payment Mode: {pay === "momo" ? "Mobile Money" : pay === "card" ? "Card" : "Cash on Delivery"}</p>
+            <p>
+              {fullName} · {phone}
+            </p>
+            <p>
+              {area}, {city}, Tanzania
+            </p>
+            <p className="pt-1 text-primary font-medium">
+              Payment Mode:{" "}
+              {pay === "momo" ? "Mobile Money" : pay === "card" ? "Card" : "Cash on Delivery"}
+            </p>
+            {currentInvoice && (
+              <p className="pt-1 text-[#174A35] font-semibold flex items-center gap-1.5">
+                <FileText className="size-3.5" />
+                <span>Invoice Issued: #{currentInvoice.invoiceNumber}</span>
+              </p>
+            )}
           </div>
+
+          {/* Invoice Actions */}
+          {currentInvoice && (
+            <div className="mt-6 p-4 rounded-2xl bg-[#F7F3EA] border border-[#E8E2D8] flex flex-wrap items-center justify-between gap-3 text-left">
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#C9A45C]">
+                  Official Receipt
+                </span>
+                <p className="font-serif font-bold text-sm text-[#0F3326]">
+                  Tax Invoice #{currentInvoice.invoiceNumber}
+                </p>
+                <p className="text-xs text-slate-500">
+                  Total Paid: TZS {currentInvoice.total.toLocaleString()}
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setInvoiceModalOpen(true)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-white border border-[#E8E2D8] text-[#174A35] hover:bg-slate-50 shadow-xs transition"
+                >
+                  <FileText className="size-3.5" />
+                  <span>View Invoice</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => downloadInvoicePDF(currentInvoice)}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-[#174A35] text-white hover:bg-[#0F3326] shadow-sm transition"
+                >
+                  <Download className="size-3.5" />
+                  <span>Download PDF</span>
+                </button>
+              </div>
+            </div>
+          )}
 
           <div className="mt-8 flex flex-wrap justify-center gap-4">
             <Link to="/track" className="btn-base btn-primary px-8">
@@ -161,6 +266,13 @@ function Checkout() {
               Explore More Products
             </Link>
           </div>
+
+          {/* Tax Invoice Modal */}
+          <InvoiceModal
+            invoice={currentInvoice}
+            isOpen={invoiceModalOpen}
+            onClose={() => setInvoiceModalOpen(false)}
+          />
         </div>
       </Site>
     );
@@ -386,8 +498,12 @@ function Checkout() {
                 {/* Delivery Snapshot */}
                 <div className="rounded-xl bg-secondary/40 p-4 border border-border text-xs text-muted-foreground">
                   <p className="font-semibold text-foreground mb-1">Delivering To:</p>
-                  <p className="text-foreground">{fullName} ({phone})</p>
-                  <p>{area}, {city}, Tanzania</p>
+                  <p className="text-foreground">
+                    {fullName} ({phone})
+                  </p>
+                  <p>
+                    {area}, {city}, Tanzania
+                  </p>
                   {notes && <p className="italic mt-1">Notes: "{notes}"</p>}
                   <p className="mt-2 text-primary font-medium">
                     Payment via: {payments.find((p) => p.id === pay)?.label}
@@ -397,7 +513,10 @@ function Checkout() {
                 {/* Item List */}
                 <div className="space-y-3 divide-y divide-border/60">
                   {detailed.map(({ product, qty }) => (
-                    <div key={product.id} className="flex items-center justify-between pt-3 text-sm">
+                    <div
+                      key={product.id}
+                      className="flex items-center justify-between pt-3 text-sm"
+                    >
                       <div className="flex items-center gap-3">
                         <img
                           src={product.image}
@@ -406,10 +525,14 @@ function Checkout() {
                         />
                         <div>
                           <p className="font-medium text-foreground">{product.name}</p>
-                          <p className="text-xs text-muted-foreground">{qty} × {money(product.price)}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {qty} × {money(product.price)}
+                          </p>
                         </div>
                       </div>
-                      <span className="font-semibold text-primary">{money(product.price * qty)}</span>
+                      <span className="font-semibold text-primary">
+                        {money(product.price * qty)}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -431,7 +554,9 @@ function Checkout() {
                     className="btn-base bg-rose text-white hover:bg-rose/90 px-8 font-semibold shadow-soft disabled:opacity-60"
                   >
                     {state === "loading" && <Loader2 className="size-4 animate-spin mr-2" />}
-                    {state === "loading" ? "Confirming Order…" : `Place Order · ${money(grandTotal)}`}
+                    {state === "loading"
+                      ? "Confirming Order…"
+                      : `Place Order · ${money(grandTotal)}`}
                   </button>
                 </div>
               </div>
@@ -463,7 +588,10 @@ function Checkout() {
                 <ShieldCheck className="size-4 text-primary shrink-0" />
                 <span>Baraka SMS Notification</span>
               </p>
-              <p>You will receive an automated confirmation SMS with dispatch details upon submission.</p>
+              <p>
+                You will receive an automated confirmation SMS with dispatch details upon
+                submission.
+              </p>
             </div>
           </aside>
         </div>

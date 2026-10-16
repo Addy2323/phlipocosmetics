@@ -31,10 +31,9 @@ export function StartupLoader() {
   }, [phase]);
 
   useEffect(() => {
-    if (phase === "fading") {
-      const timer = setTimeout(() => setPhase("gone"), 300);
-      return () => clearTimeout(timer);
-    }
+    if (phase !== "fading") return;
+    const timer = setTimeout(() => setPhase("gone"), 300);
+    return () => clearTimeout(timer);
   }, [phase]);
 
   if (phase === "gone") return null;

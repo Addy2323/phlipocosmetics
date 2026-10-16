@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   Truck,
   ShieldCheck,
@@ -16,20 +16,33 @@ import {
   Search,
   Filter,
   ChevronRight,
+  Percent,
 } from "lucide-react";
 import heroLuminous from "@/assets/hero/hero-luminous.jpg";
+import heroShop from "@/assets/hero/shop.png";
+import heroBurgundy from "@/assets/hero/hero.jpg";
+import mobileHeroModel from "@/assets/hero/mobile-hero-model.jpg";
+import heroSalonBraids from "@/assets/hero/hero-salon-braids.jpg";
+import heroSalonCurls from "@/assets/hero/hero-salon-curls.jpg";
+import mobileOfferBanner from "@/assets/mobile-offer-banner.jpg";
+import beautyTools from "@/assets/beauty-tools.jpg";
+import cream from "@/assets/p-cream.jpg";
+import lipstick from "@/assets/p-lipstick.jpg";
+import hairoil from "@/assets/p-hairoil.jpg";
 import salon from "@/assets/salon/salon.jpg";
 import catSkincare from "@/assets/skincare/cat-skincare.jpg";
 import catMakeup from "@/assets/makeup/cat-makeup.jpg";
 import catHair from "@/assets/hair-care/cat-hair.jpg";
 import catFragrance from "@/assets/fragrance/cat-fragrance.jpg";
+import catBodyOil from "@/assets/body-oil/cat-body-oil.jpg";
+import catSoap from "@/assets/soap/cat-soap.jpg";
 import { Site, Section } from "@/components/Site";
 import { ProductCard } from "@/components/ProductCard";
 import { MobileProductCard } from "@/components/MobileProductCard";
 import { products, categories, money, BRAND, salonServices } from "@/data/shop";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-export const Route = createFileRoute("/")(  {
+export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Philipo Cosmetics & Hair Salon — Luxury Beauty in Tanzania" },
@@ -48,6 +61,59 @@ export const Route = createFileRoute("/")(  {
   }),
   component: Home,
 });
+
+interface HeroSlide {
+  image: string;
+  alt: string;
+  badge: string;
+  desktopPosition: string;
+  mobilePosition: string;
+}
+
+const heroSlides: HeroSlide[] = [
+  {
+    image: heroLuminous,
+    alt: "Philipo Cosmetics Editorial Campaign — Radiant Natural Beauty",
+    badge: "Luxury Cosmetics & Hair Salon · Tanzania",
+    desktopPosition: "object-[78%_center] sm:object-[80%_center] lg:object-[82%_center]",
+    mobilePosition: "object-[72%_center]",
+  },
+  {
+    image: heroShop,
+    alt: "Philipo Cosmetics Flagship Boutique & Salon Suite — Tanzania",
+    badge: "Flagship Boutique & Salon Suite · Tanzania",
+    desktopPosition: "object-[center_28%] sm:object-[75%_28%] lg:object-[80%_28%]",
+    mobilePosition: "object-[center_25%]",
+  },
+  {
+    image: heroBurgundy,
+    alt: "Philipo Cosmetics Evening Luxury Glamour & Radiant Serums",
+    badge: "Authentic Luxury Skincare & Makeup",
+    desktopPosition: "object-[68%_center] sm:object-[72%_center] lg:object-[75%_center]",
+    mobilePosition: "object-[65%_center]",
+  },
+  {
+    image: mobileHeroModel,
+    alt: "Philipo Cosmetics Radiant Collection & Glow Serums",
+    badge: "100% Genuine Provenance Guaranteed",
+    desktopPosition: "object-[80%_center] sm:object-[84%_center] lg:object-[86%_center]",
+    mobilePosition: "object-[72%_center]",
+  },
+  {
+    image: heroSalonBraids,
+    alt: "Philipo Hair Salon — Master Stylists & Knotless Braids",
+    badge: "Master Salon Stylists · Dar es Salaam",
+    desktopPosition: "object-[62%_25%] sm:object-[66%_25%] lg:object-[70%_20%]",
+    mobilePosition: "object-[55%_25%]",
+  },
+  {
+    image: heroSalonCurls,
+    alt: "Philipo Hair Salon — Luxury Waves & Bespoke Styling",
+    badge: "Bespoke Hair Artistry & Care",
+    desktopPosition: "object-[62%_20%] sm:object-[66%_20%] lg:object-[68%_15%]",
+    mobilePosition: "object-[55%_20%]",
+  },
+];
 
 const trustHighlights = [
   {
@@ -125,25 +191,45 @@ const verifiedReviews = [
 
 /* Mobile category shortcuts with circular images */
 const mobileCategories = [
-  { name: "Skincare", image: catSkincare, search: "Skincare" },
-  { name: "Makeup", image: catMakeup, search: "Makeup" },
-  { name: "Fragrances", image: catFragrance, search: "Fragrance" },
-  { name: "Hair Care", image: catHair, search: "Hair" },
-  { name: "Beauty Tools", image: catSkincare, search: "All" },
-  { name: "Offers", image: catMakeup, search: "All" },
+  { name: "Skincare", image: cream, search: "Skincare", isOffer: false },
+  { name: "Makeup", image: lipstick, search: "Makeup", isOffer: false },
+  { name: "Fragrances", image: catFragrance, search: "Fragrance", isOffer: false },
+  { name: "Hair Care", image: hairoil, search: "Hair", isOffer: false },
+  { name: "Body Oils", image: catBodyOil, search: "Body Oils", isOffer: false },
+  { name: "Soaps", image: catSoap, search: "Soaps", isOffer: false },
+  { name: "Beauty Tools", image: beautyTools, search: "Tools", isOffer: false },
+  { name: "Offers", image: "", search: "All", isOffer: true },
 ];
 
 function Home() {
   const bestSellers = products.slice(0, 4);
   const newArrivals = [
     products.find((p) => p.id === "P-1005") || products[0],
-    products.find((p) => p.id === "P-1002") || products[1],
-    products.find((p) => p.id === "P-1001") || products[2],
-    products.find((p) => p.id === "P-1003") || products[3],
+    products.find((p) => p.id === "P-1007") || products[1],
+    products.find((p) => p.id === "P-1003") || products[2],
+    products.find((p) => p.id === "P-1006") || products[3],
   ];
 
   const isMobile = useIsMobile();
   const [mobileSearchQuery, setMobileSearchQuery] = useState("");
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  // Auto-rotate hero images seamlessly every 5 seconds (5000ms) without visible controls
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+    }, 5000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  const searchMatches = mobileSearchQuery.trim()
+    ? products.filter(
+        (p) =>
+          p.name.toLowerCase().includes(mobileSearchQuery.toLowerCase()) ||
+          p.category.toLowerCase().includes(mobileSearchQuery.toLowerCase()),
+      )
+    : [];
 
   return (
     <Site>
@@ -152,52 +238,67 @@ function Home() {
       {/* ═══════════════════════════════════════════════════════ */}
       <div className="md:hidden">
         {/* Section B — Premium Promotional Hero Banner */}
-        <section className="px-4 pt-4 pb-2">
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#FCEAF2] via-[#FFF5FA] to-[#FCEAF2] shadow-soft">
-            <div className="relative flex items-stretch min-h-[200px]">
+        <section className="px-4 pt-3 pb-2">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#FDEEF4] via-[#FFF3F8] to-[#FCEAF2] shadow-soft border border-[#EC008C]/15">
+            <div className="relative flex items-stretch min-h-[220px]">
               {/* Left content */}
-              <div className="flex-1 p-5 flex flex-col justify-center z-10">
-                <div className="inline-flex items-center gap-1 rounded-full bg-white/80 px-2.5 py-0.5 text-[9px] font-bold text-[#EC008C] uppercase tracking-wider w-fit shadow-xs mb-2">
-                  <Sparkles className="size-2.5" /> Philipo Cosmetics
+              <div className="flex-1 p-5 pr-1 flex flex-col justify-center z-10">
+                {/* Philipo Cosmetics Logo brand mark */}
+                <div className="mb-2">
+                  <div className="flex items-center gap-1.5">
+                    <Sparkles className="size-3 text-[#EC008C]" />
+                    <span className="font-display text-lg font-bold text-[#243B90] tracking-tight">
+                      Philipo{" "}
+                      <span className="font-sans italic text-[#EC008C] font-semibold text-base">
+                        Cosmetics
+                      </span>
+                    </span>
+                  </div>
+                  <p className="text-[7.5px] font-semibold tracking-[0.24em] text-[#77747C] uppercase mt-0.5">
+                    BEAUTY · CARE · CONFIDENCE
+                  </p>
                 </div>
-                <h2 className="font-display text-xl font-semibold text-[#243B90] leading-tight">
+
+                <h2 className="font-display text-2xl xs:text-[26px] font-semibold text-[#243B90] leading-[1.12] tracking-tight">
                   Glow Naturally,
                   <br />
                   <span className="text-[#EC008C] italic">Shine Beautifully</span>
                 </h2>
-                <p className="mt-1.5 text-[10px] text-[#77747C] leading-relaxed max-w-[180px]">
+                <p className="mt-1.5 text-[10.5px] text-[#77747C] leading-relaxed max-w-[165px]">
                   Explore our premium beauty collection for radiant you.
                 </p>
                 <Link
                   to="/shop"
                   search={{ category: "All" }}
-                  className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-[#EC008C] px-4 py-2 text-[11px] font-semibold text-white shadow-md w-fit hover:bg-[#D4006F] transition-colors active:scale-95"
+                  className="mt-3.5 inline-flex items-center gap-1.5 rounded-full bg-[#EC008C] px-4 py-2 text-[11px] font-semibold text-white shadow-md w-fit hover:bg-[#D4006F] transition-all active:scale-95"
                 >
                   Shop Now <ArrowRight className="size-3" />
                 </Link>
               </div>
-              {/* Right hero image */}
-              <div className="w-[45%] relative overflow-hidden">
-                <img
-                  src={heroLuminous}
-                  alt="Premium Beauty"
-                  className="absolute inset-0 size-full object-cover object-center"
-                />
-                <div className="absolute inset-0 bg-gradient-to-r from-[#FCEAF2]/60 via-transparent to-transparent" />
+
+              {/* Right hero image - seamless automatic slideshow with smooth crossfade */}
+              <div className="w-[50%] relative overflow-hidden flex items-center justify-end">
+                {heroSlides.map((slide, index) => {
+                  const isActive = index === currentSlide;
+                  return (
+                    <img
+                      key={index}
+                      src={slide.image}
+                      alt={slide.alt}
+                      className={`absolute inset-0 size-full object-cover transition-opacity duration-1000 ease-in-out ${
+                        slide.mobilePosition
+                      } ${isActive ? "opacity-100 z-0" : "opacity-0 -z-10 pointer-events-none"}`}
+                    />
+                  );
+                })}
+                <div className="absolute inset-y-0 left-0 w-10 bg-gradient-to-r from-[#FFF3F8] to-transparent pointer-events-none z-10" />
               </div>
-            </div>
-            {/* Dots indicator */}
-            <div className="flex items-center justify-center gap-1.5 pb-3">
-              <span className="size-1.5 rounded-full bg-[#EC008C]" />
-              <span className="size-1.5 rounded-full bg-[#EC008C]/30" />
-              <span className="size-1.5 rounded-full bg-[#EC008C]/30" />
-              <span className="size-1.5 rounded-full bg-[#EC008C]/30" />
             </div>
           </div>
         </section>
 
         {/* Section C — Product Search Bar */}
-        <section className="px-4 py-3">
+        <section className="px-4 py-2.5">
           <div className="relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-[#77747C]" />
             <input
@@ -205,19 +306,46 @@ function Home() {
               value={mobileSearchQuery}
               onChange={(e) => setMobileSearchQuery(e.target.value)}
               placeholder="Search for beauty products..."
-              className="h-12 w-full rounded-2xl border border-border bg-white pl-11 pr-12 text-sm outline-none transition-all focus:border-[#EC008C] focus:ring-2 focus:ring-[#EC008C]/20 shadow-xs"
+              className="h-12 w-full rounded-2xl border border-border/80 bg-white pl-11 pr-12 text-sm text-[#25232B] placeholder:text-[#77747C] outline-none transition-all focus:border-[#EC008C] focus:ring-2 focus:ring-[#EC008C]/20 shadow-xs"
             />
-            <button
-              aria-label="Filters"
-              className="absolute right-3 top-1/2 -translate-y-1/2 grid size-8 place-items-center rounded-lg bg-[#FCEAF2] transition-colors hover:bg-[#EC008C]/20"
+            <Link
+              to="/shop"
+              search={{ category: "All" }}
+              aria-label="Filter products"
+              className="absolute right-2 top-1/2 -translate-y-1/2 grid size-8 place-items-center rounded-xl bg-[#FCEAF2] text-[#EC008C] transition-colors hover:bg-[#EC008C]/20 active:scale-95"
             >
               <Filter className="size-4 text-[#EC008C]" />
-            </button>
+            </Link>
           </div>
+
+          {/* Quick live search drop-down if user types */}
+          {searchMatches.length > 0 && (
+            <div className="mt-2 rounded-2xl bg-white border border-border p-3 shadow-lg max-h-60 overflow-y-auto space-y-1.5 z-20 relative">
+              {searchMatches.slice(0, 4).map((item) => (
+                <Link
+                  key={item.id}
+                  to="/product/$slug"
+                  params={{ slug: item.slug }}
+                  className="flex items-center gap-3 p-2 rounded-xl hover:bg-secondary/60 transition-colors"
+                >
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="size-10 rounded-lg object-cover border border-border"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold text-[#25232B] truncate">{item.name}</p>
+                    <p className="text-[10px] text-rose">{item.category}</p>
+                  </div>
+                  <span className="text-xs font-bold text-[#243B90]">{money(item.price)}</span>
+                </Link>
+              ))}
+            </div>
+          )}
         </section>
 
         {/* Section D — Horizontal Category Shortcuts */}
-        <section className="py-2">
+        <section className="py-2.5">
           <div className="flex gap-4 overflow-x-auto px-4 pb-2 scrollbar-hide">
             {mobileCategories.map((cat) => (
               <Link
@@ -226,15 +354,21 @@ function Home() {
                 search={{ category: cat.search }}
                 className="flex flex-col items-center gap-1.5 shrink-0 group"
               >
-                <div className="size-[60px] rounded-full overflow-hidden border-2 border-[#FCEAF2] shadow-xs group-hover:border-[#EC008C] transition-colors">
-                  <img
-                    src={cat.image}
-                    alt={cat.name}
-                    loading="lazy"
-                    className="size-full object-cover"
-                  />
+                <div className="size-[62px] rounded-full overflow-hidden bg-[#FCEAF2] border-2 border-white shadow-xs p-1 flex items-center justify-center group-hover:border-[#EC008C] group-active:scale-95 transition-all">
+                  {cat.isOffer ? (
+                    <div className="size-full rounded-full bg-gradient-to-br from-[#EC008C] to-[#FF40A8] flex items-center justify-center text-white shadow-xs">
+                      <Percent className="size-6 text-white" strokeWidth={2.5} />
+                    </div>
+                  ) : (
+                    <img
+                      src={cat.image}
+                      alt={cat.name}
+                      loading="lazy"
+                      className="size-full rounded-full object-cover"
+                    />
+                  )}
                 </div>
-                <span className="text-[10px] font-medium text-[#25232B] text-center leading-tight whitespace-nowrap">
+                <span className="text-[11px] font-medium text-[#25232B] text-center leading-tight whitespace-nowrap">
                   {cat.name}
                 </span>
               </Link>
@@ -243,20 +377,20 @@ function Home() {
         </section>
 
         {/* Section E — Best Sellers (horizontal scroll) */}
-        <section className="py-4">
+        <section className="py-3">
           <div className="flex items-center justify-between px-4 mb-3">
-            <h2 className="font-display text-xl font-semibold text-[#25232B]">Best Sellers</h2>
+            <h2 className="font-display text-2xl font-bold text-[#25232B]">Best Sellers</h2>
             <Link
               to="/shop"
               search={{ category: "All" }}
-              className="text-xs font-semibold text-[#EC008C] flex items-center gap-0.5"
+              className="text-xs font-semibold text-[#EC008C] flex items-center gap-0.5 hover:underline"
             >
               View All <ArrowRight className="size-3" />
             </Link>
           </div>
           <div className="flex gap-3 overflow-x-auto px-4 pb-3 scrollbar-hide">
             {bestSellers.map((p) => (
-              <div key={p.id} className="shrink-0 w-[160px]">
+              <div key={p.id} className="shrink-0 w-[165px]">
                 <MobileProductCard product={p} />
               </div>
             ))}
@@ -264,23 +398,23 @@ function Home() {
         </section>
 
         {/* Section F — New Arrivals (horizontal scroll) */}
-        <section className="py-4">
+        <section className="py-3">
           <div className="flex items-center justify-between px-4 mb-3">
-            <h2 className="font-display text-xl font-semibold text-[#25232B] flex items-center gap-2">
+            <h2 className="font-display text-2xl font-bold text-[#25232B] flex items-center gap-2">
               New Arrivals
               <Flame className="size-4 text-[#EC008C] fill-[#EC008C]" />
             </h2>
             <Link
               to="/shop"
               search={{ category: "All" }}
-              className="text-xs font-semibold text-[#EC008C] flex items-center gap-0.5"
+              className="text-xs font-semibold text-[#EC008C] flex items-center gap-0.5 hover:underline"
             >
               View All <ArrowRight className="size-3" />
             </Link>
           </div>
           <div className="flex gap-3 overflow-x-auto px-4 pb-3 scrollbar-hide">
             {newArrivals.map((p) => (
-              <div key={`new-${p.id}`} className="shrink-0 w-[160px]">
+              <div key={`new-${p.id}`} className="shrink-0 w-[165px]">
                 <MobileProductCard product={p} />
               </div>
             ))}
@@ -289,34 +423,36 @@ function Home() {
 
         {/* Section G — Special Offer Banner */}
         <section className="px-4 py-3">
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#FCEAF2] via-[#FFF5FA] to-[#FCEAF2] p-5 shadow-soft border border-[#EC008C]/10">
-            <div className="flex items-center gap-4">
-              <div className="flex-1">
-                <span className="text-[10px] font-bold text-[#EC008C] uppercase tracking-wider">Special Offer</span>
-                <h3 className="font-display text-xl font-semibold text-[#25232B] mt-1 leading-tight">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#FCEAF2] via-[#FFF3F8] to-[#FCEAF2] p-5 shadow-soft border border-[#EC008C]/15">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex-1 z-10">
+                <span className="text-[10px] font-bold text-[#EC008C] uppercase tracking-wider">
+                  Special Offer
+                </span>
+                <h3 className="font-display text-2xl font-bold text-[#25232B] mt-1 leading-tight">
                   Up to 30% Off
                 </h3>
                 <p className="text-[11px] text-[#77747C] mt-1">On selected beauty essentials</p>
                 <Link
                   to="/shop"
                   search={{ category: "All" }}
-                  className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-[#EC008C] px-4 py-2 text-[11px] font-semibold text-white shadow-md hover:bg-[#D4006F] transition-colors active:scale-95"
+                  className="mt-3.5 inline-flex items-center gap-1.5 rounded-full bg-[#EC008C] px-4 py-2 text-[11px] font-semibold text-white shadow-md hover:bg-[#D4006F] transition-all active:scale-95"
                 >
                   Grab Now <ArrowRight className="size-3" />
                 </Link>
               </div>
-              <div className="shrink-0 w-[100px] h-[100px] rounded-2xl overflow-hidden">
+              <div className="shrink-0 w-[110px] h-[100px] relative rounded-2xl overflow-hidden shadow-xs border border-white">
                 <img
-                  src={catMakeup}
+                  src={mobileOfferBanner}
                   alt="Special Offers"
                   loading="lazy"
                   className="size-full object-cover"
                 />
+                {/* Circular 30% badge */}
+                <div className="absolute top-1 right-1 grid size-7 place-items-center rounded-full bg-white/95 text-[9px] font-bold text-[#EC008C] shadow-xs">
+                  30%
+                </div>
               </div>
-            </div>
-            {/* Floating 30% badge */}
-            <div className="absolute right-4 top-3 text-right">
-              <span className="text-3xl font-bold text-[#EC008C]/20">30%</span>
             </div>
           </div>
         </section>
@@ -370,7 +506,10 @@ function Home() {
           </div>
           <div className="flex gap-3 overflow-x-auto px-4 pb-3 scrollbar-hide">
             {verifiedReviews.map((rev) => (
-              <div key={rev.name} className="shrink-0 w-[280px] rounded-2xl bg-white border border-border p-4 shadow-xs">
+              <div
+                key={rev.name}
+                className="shrink-0 w-[280px] rounded-2xl bg-white border border-border p-4 shadow-xs"
+              >
                 <div className="flex items-center gap-1 text-[#C6A56B]">
                   {Array.from({ length: rev.rating }).map((_, i) => (
                     <Star key={i} className="size-3 fill-[#C6A56B] text-[#C6A56B]" />
@@ -393,18 +532,35 @@ function Home() {
       {/*   DESKTOP HOMEPAGE — visible >= md (preserved)         */}
       {/* ═══════════════════════════════════════════════════════ */}
       <div className="hidden md:block">
-        {/* 1. Luminous Hero Section (Full-Width Editorial Background) */}
-        <section className="relative overflow-hidden min-h-[580px] sm:min-h-[640px] lg:min-h-[720px] flex items-center border-b border-border/60 bg-[#FAF8F5]">
-          {/* Full-bleed high-resolution background image */}
-          <img
-            src={heroLuminous}
-            alt="Philipo Cosmetics Editorial Campaign"
-            className="absolute inset-0 size-full object-cover object-[78%_center] sm:object-[80%_center] lg:object-[82%_center] pointer-events-none"
-          />
+        {/* 1. Luminous Hero Section (Full-Width Editorial Background with Auto Crossfade) */}
+        <section
+          className="relative overflow-hidden min-h-[580px] sm:min-h-[640px] lg:min-h-[720px] flex items-center border-b border-border/60 bg-[#FAF8F5]"
+          aria-label="Philipo Cosmetics Hero Gallery"
+        >
+          {/* Full-bleed high-resolution background images with seamless crossfade */}
+          {heroSlides.map((slide, index) => {
+            const isActive = index === currentSlide;
+            return (
+              <div
+                key={index}
+                className={`absolute inset-0 size-full transition-opacity duration-1000 ease-in-out ${
+                  isActive ? "opacity-100 z-0" : "opacity-0 -z-10 pointer-events-none"
+                }`}
+              >
+                <img
+                  src={slide.image}
+                  alt={slide.alt}
+                  className={`size-full object-cover pointer-events-none transition-transform duration-[6000ms] ease-out ${
+                    isActive ? "scale-100" : "scale-105"
+                  } ${slide.desktopPosition}`}
+                />
+              </div>
+            );
+          })}
 
           {/* Soft luxury editorial gradient veil for text contrast */}
-          <div className="absolute inset-y-0 left-0 w-full sm:w-[85%] lg:w-[62%] bg-gradient-to-r from-[#FAF8F5]/98 via-[#FAF8F5]/85 to-transparent pointer-events-none" />
-          <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#FAF8F5]/90 via-transparent to-transparent sm:hidden pointer-events-none" />
+          <div className="absolute inset-y-0 left-0 w-full sm:w-[85%] lg:w-[62%] bg-gradient-to-r from-[#FAF8F5]/98 via-[#FAF8F5]/85 to-transparent pointer-events-none z-[5]" />
+          <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#FAF8F5]/90 via-transparent to-transparent sm:hidden pointer-events-none z-[5]" />
 
           <div className="relative z-10 mx-auto max-w-7xl px-4 py-12 sm:px-6 md:py-16 lg:py-24 w-full">
             <div className="max-w-xl lg:max-w-2xl rise-in">
@@ -496,7 +652,7 @@ function Home() {
             </Link>
           }
         >
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-5">
             {categories.map((c) => (
               <Link
                 key={c.name}
@@ -535,7 +691,9 @@ function Home() {
                   </p>
                   <div className="mt-4 flex items-center justify-between border-t border-white/20 pt-3">
                     <span className="text-xs text-white/80 font-medium">
-                      {c.count > 0 ? `${c.count} ${c.count === 1 ? "Product" : "Products"}` : "Signature Releases"}
+                      {c.count > 0
+                        ? `${c.count} ${c.count === 1 ? "Product" : "Products"}`
+                        : "Signature Releases"}
                     </span>
                     <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-white group-hover:text-rose group-hover:translate-x-1 transition-all">
                       Explore <ArrowRight className="size-3.5" />
@@ -614,9 +772,9 @@ function Home() {
                 Precision Braids & Silk Press.
               </h2>
               <p className="mt-4 text-sm sm:text-base text-muted-foreground leading-relaxed">
-                Experience personalized hair artistry in our Dar es Salaam private suites. From intricate knotless
-                braids to silk presses and bespoke bridal hair, our master stylists tailor every
-                session to your hair's unique health, texture, and elegance.
+                Experience personalized hair artistry in our Dar es Salaam private suites. From
+                intricate knotless braids to silk presses and bespoke bridal hair, our master
+                stylists tailor every session to your hair's unique health, texture, and elegance.
               </p>
 
               <div className="mt-6 space-y-3 border-y border-border py-4 text-sm">
@@ -634,7 +792,10 @@ function Home() {
               </div>
 
               <div className="mt-8 flex flex-wrap items-center gap-4">
-                <Link to="/salon" className="btn-base bg-rose text-white hover:bg-rose/90 shadow-lift px-6 py-3 font-semibold rounded-full">
+                <Link
+                  to="/salon"
+                  className="btn-base bg-rose text-white hover:bg-rose/90 shadow-lift px-6 py-3 font-semibold rounded-full"
+                >
                   <CalendarHeart className="size-4 mr-1.5" /> Book Hair Appointment
                 </Link>
                 <span className="text-xs text-muted-foreground">
@@ -654,8 +815,8 @@ function Home() {
                 Nationwide Delivery on Us
               </h3>
               <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                Orders of TSh 150,000 or more qualify for zero-cost delivery across all mainland Tanzania
-                regions and Zanzibar. Secure your beauty essentials today.
+                Orders of TSh 150,000 or more qualify for zero-cost delivery across all mainland
+                Tanzania regions and Zanzibar. Secure your beauty essentials today.
               </p>
             </div>
             <div className="mt-6 md:mt-0 shrink-0">
@@ -677,10 +838,12 @@ function Home() {
               <div className="grid size-12 place-items-center rounded-2xl bg-primary/10 text-primary border border-primary/20">
                 <Award className="size-6 text-primary" />
               </div>
-              <h3 className="mt-5 font-display text-xl font-medium">Formulated for Coastal Climates</h3>
+              <h3 className="mt-5 font-display text-xl font-medium">
+                Formulated for Coastal Climates
+              </h3>
               <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                Every skincare serum and hair blend is curated specifically to balance hydration in humid,
-                sunny climates without clogging pores or weighing curls down.
+                Every skincare serum and hair blend is curated specifically to balance hydration in
+                humid, sunny climates without clogging pores or weighing curls down.
               </p>
             </div>
 
@@ -688,10 +851,12 @@ function Home() {
               <div className="grid size-12 place-items-center rounded-2xl bg-rose/10 text-rose border border-rose/20">
                 <HeartHandshake className="size-6 text-rose" />
               </div>
-              <h3 className="mt-5 font-display text-xl font-medium">Salon Tested by Master Artists</h3>
+              <h3 className="mt-5 font-display text-xl font-medium">
+                Salon Tested by Master Artists
+              </h3>
               <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                Our hair and makeup products are actively used daily in our professional salon suites,
-                guaranteeing real-world performance on diverse textures.
+                Our hair and makeup products are actively used daily in our professional salon
+                suites, guaranteeing real-world performance on diverse textures.
               </p>
             </div>
 
@@ -701,8 +866,8 @@ function Home() {
               </div>
               <h3 className="mt-5 font-display text-xl font-medium">100% Genuine & Verified</h3>
               <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                No counterfeit ingredients or expired batches. All products come with lot tracking, sealed
-                packaging, and verified provenance.
+                No counterfeit ingredients or expired batches. All products come with lot tracking,
+                sealed packaging, and verified provenance.
               </p>
             </div>
           </div>
@@ -712,7 +877,10 @@ function Home() {
         <Section eyebrow="Client Words" title="Loved by Our Community">
           <div className="grid gap-6 md:grid-cols-3">
             {verifiedReviews.map((rev) => (
-              <div key={rev.name} className="card-surface flex flex-col justify-between p-6 sm:p-8 rounded-3xl border border-border/80">
+              <div
+                key={rev.name}
+                className="card-surface flex flex-col justify-between p-6 sm:p-8 rounded-3xl border border-border/80"
+              >
                 <div>
                   <div className="flex items-center gap-1 text-gold">
                     {Array.from({ length: rev.rating }).map((_, i) => (
@@ -726,7 +894,9 @@ function Home() {
                 <div className="mt-6 border-t border-border pt-4">
                   <p className="text-sm font-semibold text-foreground">{rev.name}</p>
                   <p className="text-xs text-muted-foreground">{rev.role}</p>
-                  <p className="mt-1 text-[11px] text-rose font-medium">Service / Product: {rev.product}</p>
+                  <p className="mt-1 text-[11px] text-rose font-medium">
+                    Service / Product: {rev.product}
+                  </p>
                 </div>
               </div>
             ))}
@@ -755,11 +925,17 @@ function Home() {
               >
                 <div>
                   <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <span className="font-semibold text-rose uppercase tracking-wider">{tip.category}</span>
+                    <span className="font-semibold text-rose uppercase tracking-wider">
+                      {tip.category}
+                    </span>
                     <span>{tip.readTime}</span>
                   </div>
-                  <h3 className="mt-3 font-display text-xl font-medium leading-snug">{tip.title}</h3>
-                  <p className="mt-3 text-sm text-muted-foreground leading-relaxed">{tip.snippet}</p>
+                  <h3 className="mt-3 font-display text-xl font-medium leading-snug">
+                    {tip.title}
+                  </h3>
+                  <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
+                    {tip.snippet}
+                  </p>
                 </div>
                 <div className="mt-6 pt-4 border-t border-border">
                   <Link

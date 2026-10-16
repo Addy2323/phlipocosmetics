@@ -11,7 +11,10 @@ export const Route = createFileRoute("/erp/")({
   head: () => ({
     meta: [
       { title: "ERP dashboard — Philipo Cosmetics" },
-      { name: "description", content: "Revenue, orders, profit and salon activity for Philipo Cosmetics." },
+      {
+        name: "description",
+        content: "Revenue, orders, profit and salon activity for Philipo Cosmetics.",
+      },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -32,16 +35,44 @@ function Dashboard() {
   const lowStock = stats ? stats.lowStockCount : 2;
 
   const liveKpis = [
-    { label: "Total Revenue (Gross)", value: money(totalRev), delta: "+18.4% vs last month", up: true },
-    { label: "Orders Today", value: `${todayOrders} orders`, delta: "4 pending dispatch", up: true },
-    { label: "Active Salon Chairs", value: `${activeAppts} appointments`, delta: "Next @ 14:00", up: true },
-    { label: "Low Stock Items", value: `${lowStock} products`, delta: "Requires replenishment", up: false },
-    { label: "Gross Profit Margin", value: stats ? money(stats.grossProfit) : "TSh 264,000", delta: "Margin: 53.4%", up: true },
+    {
+      label: "Total Revenue (Gross)",
+      value: money(totalRev),
+      delta: "+18.4% vs last month",
+      up: true,
+    },
+    {
+      label: "Orders Today",
+      value: `${todayOrders} orders`,
+      delta: "4 pending dispatch",
+      up: true,
+    },
+    {
+      label: "Active Salon Chairs",
+      value: `${activeAppts} appointments`,
+      delta: "Next @ 14:00",
+      up: true,
+    },
+    {
+      label: "Low Stock Items",
+      value: `${lowStock} products`,
+      delta: "Requires replenishment",
+      up: false,
+    },
+    {
+      label: "Gross Profit Margin",
+      value: stats ? money(stats.grossProfit) : "TSh 264,000",
+      delta: "Margin: 53.4%",
+      up: true,
+    },
     { label: "Baraka SMS Status", value: "Active", delta: "100% delivery rate", up: true },
   ];
 
   return (
-    <ErpPage title={`Good day, ${user?.fullName ?? "Staff"}`} subtitle="Real-time operational metrics across E-Commerce storefront and Hair Salon.">
+    <ErpPage
+      title={`Good day, ${user?.fullName ?? "Staff"}`}
+      subtitle="Real-time operational metrics across E-Commerce storefront and Hair Salon."
+    >
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
         {liveKpis.map((k) => (
           <div key={k.label} className="card-surface p-4">
@@ -49,7 +80,9 @@ function Dashboard() {
             <p className="mt-1 font-display text-2xl">{k.value}</p>
             <p
               className={`mt-1 flex items-center gap-1 text-xs ${
-                k.up ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400 font-medium"
+                k.up
+                  ? "text-emerald-600 dark:text-emerald-400"
+                  : "text-amber-600 dark:text-amber-400 font-medium"
               }`}
             >
               {k.up ? <TrendingUp className="size-3.5" /> : <AlertTriangle className="size-3.5" />}

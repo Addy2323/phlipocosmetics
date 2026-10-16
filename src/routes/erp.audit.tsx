@@ -9,7 +9,10 @@ export const Route = createFileRoute("/erp/audit")({
   head: () => ({
     meta: [
       { title: "Security & Audit Logs — Philipo ERP" },
-      { name: "description", content: "Immutable audit trail of staff actions, sign-ins, and inventory modifications." },
+      {
+        name: "description",
+        content: "Immutable audit trail of staff actions, sign-ins, and inventory modifications.",
+      },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -41,7 +44,7 @@ function AuditLogs() {
     (l) =>
       l.actor.toLowerCase().includes(query.toLowerCase()) ||
       l.action.toLowerCase().includes(query.toLowerCase()) ||
-      l.detail.toLowerCase().includes(query.toLowerCase())
+      l.detail.toLowerCase().includes(query.toLowerCase()),
   );
 
   return (
@@ -79,7 +82,10 @@ function AuditLogs() {
           </thead>
           <tbody>
             {rows.map((log) => (
-              <tr key={log.id} className="border-b last:border-0 hover:bg-secondary/30 transition-colors">
+              <tr
+                key={log.id}
+                className="border-b last:border-0 hover:bg-secondary/30 transition-colors"
+              >
                 <td className="py-2.5 text-xs text-muted-foreground font-mono">
                   {new Date(log.at).toLocaleString()}
                 </td>

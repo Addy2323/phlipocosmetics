@@ -1,4 +1,3 @@
-
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
@@ -16,6 +15,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AuthProvider } from "../lib/auth";
 import { WishlistProvider } from "../lib/wishlist";
 import { CartProvider } from "../lib/cart";
+import { Toaster } from "../components/ui/sonner";
 
 function NotFoundComponent() {
   return (
@@ -81,14 +81,27 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Philipo Cosmetics & Beauty Salon" },
-      { name: "description", content: "Premium beauty retail and salon craft in Dar es Salaam, Tanzania. Nationwide delivery." },
+      {
+        name: "description",
+        content:
+          "Premium beauty retail and salon craft in Dar es Salaam, Tanzania. Nationwide delivery.",
+      },
       { name: "author", content: "Philipo Cosmetics" },
       { property: "og:title", content: "Philipo Cosmetics & Beauty Salon" },
-      { property: "og:description", content: "Premium beauty retail and salon craft in Dar es Salaam, Tanzania." },
+      {
+        property: "og:description",
+        content: "Premium beauty retail and salon craft in Dar es Salaam, Tanzania.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "theme-color", content: "#243B90" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "default" },
+      { name: "apple-mobile-web-app-title", content: "Philipo" },
     ],
     links: [
+      { rel: "manifest", href: "/manifest.json" },
+      { rel: "apple-touch-icon", href: "/logo.png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
@@ -125,6 +138,14 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
+  useEffect(() => {
+    if ("serviceWorker" in navigator && process.env.NODE_ENV === "production") {
+      navigator.serviceWorker.register("/sw.js").catch(() => {
+        // Silently fail if SW registration fails
+      });
+    }
+  }, []);
+
   return (
     <>
       <QueryClientProvider client={queryClient}>
@@ -133,6 +154,7 @@ function RootComponent() {
             <CartProvider>
               {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
               <Outlet />
+              <Toaster />
             </CartProvider>
           </WishlistProvider>
         </AuthProvider>

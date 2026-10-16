@@ -12,18 +12,20 @@ import {
   Package,
   BarChart3,
   Store,
-  MapPin,
-  Building,
-  Home,
   ArrowRight,
   ArrowLeft,
   Loader2,
   AlertCircle,
   CheckCircle2,
-  ChevronDown,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
-import { signUpUserClient, formatTanzanianPhone, isValidPhone } from "@/lib/auth-client";
+import {
+  signUpUserClient,
+  formatTanzanianPhone,
+  isValidPhone,
+  checkAccountExists,
+} from "@/lib/auth-client";
+import { createInitialResellerApplication } from "@/lib/reseller-store";
 
 export const Route = createFileRoute("/register")({
   head: () => ({
@@ -62,44 +64,6 @@ function GoogleIcon({ className }: { className?: string }) {
   );
 }
 
-// Tanzania regions data for the clean 3-dropdown selector
-const tanzaniaRegionsData: Record<string, { districts: string[]; wards: string[] }> = {
-  "Dar es Salaam": {
-    districts: ["Kinondoni", "Ilala", "Ubungo", "Kigamboni", "Temeke"],
-    wards: ["Masaki", "Mikocheni", "Oysterbay", "Upanga", "Kariakoo", "Mbezi Beach", "Sinza"],
-  },
-  Arusha: {
-    districts: ["Arusha City", "Meru", "Karatu", "Monduli"],
-    wards: ["Kaloleni", "Sekei", "Themi", "Ngarenaro"],
-  },
-  Dodoma: {
-    districts: ["Dodoma City", "Bahi", "Chamwino"],
-    wards: ["Makole", "Miyuji", "Tambukareli"],
-  },
-  Mwanza: {
-    districts: ["Nyamagana", "Ilemela", "Sengerema"],
-    wards: ["Capripoint", "Kirumba", "Pasiansi"],
-  },
-  Kilimanjaro: {
-    districts: ["Moshi Municipal", "Hai", "Rombo"],
-    wards: ["Mji Mkuu", "Kiboriloni", "Shanty Town"],
-  },
-  Zanzibar: {
-    districts: ["Urban (Mjini)", "West", "North A"],
-    wards: ["Stone Town", "Mazizini", "Mbweni"],
-  },
-  Mbeya: {
-    districts: ["Mbeya City", "Rungwe", "Kyela"],
-    wards: ["Forest", "Iyunga", "Mwanjelwa"],
-  },
-  Morogoro: {
-    districts: ["Morogoro Urban", "Kilosa"],
-    wards: ["Boma", "Sabasaba", "Kihonda"],
-  },
-};
-
-const regionNames = Object.keys(tanzaniaRegionsData);
-
 export function RegisterPage() {
   const { user, loading, signIn } = useAuth();
   const navigate = useNavigate();
@@ -116,12 +80,6 @@ export function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // Location inputs
-  const [region, setRegion] = useState("Dar es Salaam");
-  const [district, setDistrict] = useState(tanzaniaRegionsData["Dar es Salaam"].districts[0]);
-  const [ward, setWard] = useState(tanzaniaRegionsData["Dar es Salaam"].wards[0]);
-  const [detailedAddress, setDetailedAddress] = useState("");
-
   // Agreement
   const [agreeTerms, setAgreeTerms] = useState(true);
 
@@ -134,64 +92,101 @@ export function RegisterPage() {
   // Redirect if already authenticated
   useEffect(() => {
     if (!loading && user) {
-      if (
-        user.role === "admin" ||
-        user.role === "sales_staff" ||
-        user.role === "customer_service" ||
-        user.role === "stylist"
-      ) {
-        navigate({ to: "/erp" });
+      if (user.role === "admin") {
+        navigate({ to: "/admin/dashboard" });
+      } else if (user.role === "sales" || user.role === "sales_staff") {
+        navigate({ to: "/sales/dashboard" });
       } else {
         navigate({ to: "/account" });
       }
     }
   }, [loading, user, navigate]);
 
-  function handleRegionChange(newRegion: string) {
-    setRegion(newRegion);
-    const reg = tanzaniaRegionsData[newRegion];
-    if (reg && reg.districts.length > 0) {
-      setDistrict(reg.districts[0]);
-      setWard(reg.wards[0] || "");
+  function getPasswordStrength(pass: string): {
+    label: "Weak" | "Fair" | "Strong";
+    percent: number;
+    color: string;
+  } {
+    if (!pass) return { label: "Weak", percent: 0, color: "bg-gray-200" };
+    let score = 0;
+    if (pass.length >= 8) score += 30;
+    if (pass.length >= 12) score += 20;
+    if (/[a-z]/.test(pass) && /[A-Z]/.test(pass)) score += 20;
+    if (/\d/.test(pass)) score += 15;
+    if (/[^a-zA-Z0-9]/.test(pass)) score += 15;
+
+    if (score < 40) return { label: "Weak", percent: 30, color: "bg-rose-500" };
+    if (score < 75) return { label: "Fair", percent: 65, color: "bg-amber-500" };
+    return { label: "Strong", percent: 100, color: "bg-emerald-500" };
+  }
+
+  function validateFullName(val: string): string | null {
+    const clean = val.trim();
+    if (!clean) return "Please enter your full name.";
+    if (clean.length < 3) return "Full name must be at least 3 characters long.";
+    if (!/^[a-zA-Z\s'-]+$/.test(clean)) return "Full name should only contain letters and spaces.";
+    const parts = clean.split(/\s+/).filter(Boolean);
+    if (parts.length < 2) return "Please enter both your first and last name.";
+    return null;
+  }
+
+  function validateEmail(val: string): string | null {
+    const clean = val.trim();
+    if (!clean) return "Please enter your email address.";
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(clean))
+      return "Please enter a valid email address (e.g. name@example.com).";
+    if (checkAccountExists(clean))
+      return "This email is already registered. Please sign in instead.";
+    return null;
+  }
+
+  function validatePhone(val: string): string | null {
+    const clean = val.trim();
+    if (!clean) return "Please enter your mobile phone number.";
+    const digits = clean.replace(/\D/g, "");
+    if (digits.length < 9 || digits.length > 13) {
+      return "Please enter a valid mobile number (e.g. 0712 345 678 or 0682 123 456).";
     }
+    if (checkAccountExists(clean))
+      return "This phone number is already registered. Please sign in instead.";
+    return null;
+  }
+
+  function validatePassword(val: string): string | null {
+    if (!val) return "Please enter a password.";
+    if (val.length < 8) return "Password must be at least 8 characters long.";
+    if (!/(?=.*[a-zA-Z])(?=.*\d)/.test(val))
+      return "Password must contain both letters and numbers.";
+    return null;
+  }
+
+  function validateConfirmPassword(pass: string, confirm: string): string | null {
+    if (!confirm) return "Please confirm your password.";
+    if (pass !== confirm) return "Passwords do not match.";
+    return null;
   }
 
   function validate(): boolean {
     const errs: Record<string, string> = {};
-    const cleanName = fullName.trim();
-    const cleanEmail = email.trim();
-    const cleanPhone = phone.trim();
 
-    if (!cleanName) {
-      errs.fullName = "Please enter your full name.";
-    }
+    const nameErr = validateFullName(fullName);
+    if (nameErr) errs.fullName = nameErr;
 
-    if (!cleanEmail) {
-      errs.email = "Please enter your email address.";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
-      errs.email = "Please enter a valid email address.";
-    }
+    const emailErr = validateEmail(email);
+    if (emailErr) errs.email = emailErr;
 
-    if (!cleanPhone) {
-      errs.phone = "Please enter your phone number.";
-    } else if (!isValidPhone(cleanPhone)) {
-      errs.phone = "Please enter a valid mobile number.";
-    }
+    const phoneErr = validatePhone(phone);
+    if (phoneErr) errs.phone = phoneErr;
 
-    if (!password) {
-      errs.password = "Please enter your password.";
-    } else if (password.length < 8) {
-      errs.password = "Password must be at least 8 characters.";
-    }
+    const passErr = validatePassword(password);
+    if (passErr) errs.password = passErr;
 
-    if (!confirmPassword) {
-      errs.confirmPassword = "Please confirm your password.";
-    } else if (password !== confirmPassword) {
-      errs.confirmPassword = "Passwords do not match.";
-    }
+    const confirmErr = validateConfirmPassword(password, confirmPassword);
+    if (confirmErr) errs.confirmPassword = confirmErr;
 
     if (!agreeTerms) {
-      errs.agreeTerms = "You must accept the terms.";
+      errs.agreeTerms = "You must accept the terms and conditions to register.";
     }
 
     setErrors(errs);
@@ -218,10 +213,26 @@ export function RegisterPage() {
         role: "customer",
       });
       signIn(newUser);
-      setSuccessMessage("Account created successfully! Welcome to Philipo Cosmetics.");
-      setTimeout(() => {
-        navigate({ to: "/account" });
-      }, 500);
+
+      if (accountType === "partner") {
+        createInitialResellerApplication(newUser.id, {
+          applicantType: "individual",
+          fullName: fullName.trim(),
+          phone: formattedPhone,
+          email: cleanEmail,
+        });
+        setSuccessMessage(
+          "Partner Account Created! Redirecting to complete your Reseller Application...",
+        );
+        setTimeout(() => {
+          navigate({ to: "/partner-apply" });
+        }, 600);
+      } else {
+        setSuccessMessage("Account created successfully! Welcome to Philipo Cosmetics.");
+        setTimeout(() => {
+          navigate({ to: "/account" });
+        }, 500);
+      }
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Registration failed. Please try again.";
       setErrorMessage(msg);
@@ -317,7 +328,8 @@ export function RegisterPage() {
                 Join Philipo Cosmetics
               </h1>
               <p className="text-sm lg:text-base text-gray-600 leading-relaxed max-w-md">
-                Create your customer account to explore genuine luxury cosmetics, enjoy priority salon styling, and track doorstep deliveries across Tanzania.
+                Create your customer account to explore genuine luxury cosmetics, enjoy priority
+                salon styling, and track doorstep deliveries across Tanzania.
               </p>
             </div>
 
@@ -328,7 +340,9 @@ export function RegisterPage() {
                   <ShoppingBag className="size-5" />
                 </div>
                 <span className="mt-2 text-[11px] font-medium text-gray-700 leading-tight">
-                  Manage<br />Products
+                  Manage
+                  <br />
+                  Products
                 </span>
               </div>
 
@@ -337,7 +351,9 @@ export function RegisterPage() {
                   <Calendar className="size-5" />
                 </div>
                 <span className="mt-2 text-[11px] font-medium text-gray-700 leading-tight">
-                  Handle<br />Appointments
+                  Handle
+                  <br />
+                  Appointments
                 </span>
               </div>
 
@@ -346,7 +362,9 @@ export function RegisterPage() {
                   <Package className="size-5" />
                 </div>
                 <span className="mt-2 text-[11px] font-medium text-gray-700 leading-tight">
-                  Track<br />Orders
+                  Track
+                  <br />
+                  Orders
                 </span>
               </div>
 
@@ -355,7 +373,9 @@ export function RegisterPage() {
                   <Store className="size-5" />
                 </div>
                 <span className="mt-2 text-[11px] font-medium text-gray-700 leading-tight">
-                  Salon<br />Privileges
+                  Salon
+                  <br />
+                  Privileges
                 </span>
               </div>
             </div>
@@ -403,7 +423,9 @@ export function RegisterPage() {
                 >
                   <div
                     className={`size-8 rounded-xl grid place-items-center shrink-0 ${
-                      accountType === "customer" ? "bg-[#E6007A]/15 text-[#E6007A]" : "bg-gray-100 text-gray-500"
+                      accountType === "customer"
+                        ? "bg-[#E6007A]/15 text-[#E6007A]"
+                        : "bg-gray-100 text-gray-500"
                     }`}
                   >
                     <User className="size-4" />
@@ -426,14 +448,18 @@ export function RegisterPage() {
                 >
                   <div
                     className={`size-8 rounded-xl grid place-items-center shrink-0 ${
-                      accountType === "partner" ? "bg-[#E6007A]/15 text-[#E6007A]" : "bg-gray-100 text-gray-500"
+                      accountType === "partner"
+                        ? "bg-[#E6007A]/15 text-[#E6007A]"
+                        : "bg-gray-100 text-gray-500"
                     }`}
                   >
                     <Store className="size-4" />
                   </div>
                   <div>
                     <p className="text-xs font-semibold leading-tight">Business Partner</p>
-                    <p className="text-[10px] text-gray-500 leading-tight">For resellers / partners</p>
+                    <p className="text-[10px] text-gray-500 leading-tight">
+                      For resellers / partners
+                    </p>
                   </div>
                 </button>
               </div>
@@ -453,11 +479,22 @@ export function RegisterPage() {
                       setFullName(e.target.value);
                       if (errors.fullName) setErrors((prev) => ({ ...prev, fullName: "" }));
                     }}
-                    placeholder="Full Name"
-                    className="block w-full rounded-xl sm:rounded-2xl border border-gray-200 bg-white py-2.5 pl-10 pr-3 text-xs sm:text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-[#E6007A] focus:ring-1 focus:ring-[#E6007A]"
+                    onBlur={() => {
+                      const err = validateFullName(fullName);
+                      if (err) setErrors((prev) => ({ ...prev, fullName: err }));
+                    }}
+                    placeholder="Full Name (First and Last Name)"
+                    className={`block w-full rounded-xl sm:rounded-2xl border bg-white py-2.5 pl-10 pr-3 text-xs sm:text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none transition-all ${
+                      errors.fullName
+                        ? "border-destructive focus:border-destructive ring-1 ring-destructive/20"
+                        : "border-gray-200 focus:border-[#E6007A] focus:ring-1 focus:ring-[#E6007A]"
+                    }`}
                   />
                   {errors.fullName && (
-                    <p className="text-[10.5px] font-medium text-destructive mt-0.5 pl-2">{errors.fullName}</p>
+                    <p className="text-[10.5px] font-medium text-destructive mt-0.5 pl-2 flex items-center gap-1">
+                      <AlertCircle className="size-3" />
+                      <span>{errors.fullName}</span>
+                    </p>
                   )}
                 </div>
 
@@ -474,11 +511,22 @@ export function RegisterPage() {
                       setEmail(e.target.value);
                       if (errors.email) setErrors((prev) => ({ ...prev, email: "" }));
                     }}
+                    onBlur={() => {
+                      const err = validateEmail(email);
+                      if (err) setErrors((prev) => ({ ...prev, email: err }));
+                    }}
                     placeholder="Email Address"
-                    className="block w-full rounded-xl sm:rounded-2xl border border-gray-200 bg-white py-2.5 pl-10 pr-3 text-xs sm:text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-[#E6007A] focus:ring-1 focus:ring-[#E6007A]"
+                    className={`block w-full rounded-xl sm:rounded-2xl border bg-white py-2.5 pl-10 pr-3 text-xs sm:text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none transition-all ${
+                      errors.email
+                        ? "border-destructive focus:border-destructive ring-1 ring-destructive/20"
+                        : "border-gray-200 focus:border-[#E6007A] focus:ring-1 focus:ring-[#E6007A]"
+                    }`}
                   />
                   {errors.email && (
-                    <p className="text-[10.5px] font-medium text-destructive mt-0.5 pl-2">{errors.email}</p>
+                    <p className="text-[10.5px] font-medium text-destructive mt-0.5 pl-2 flex items-center gap-1">
+                      <AlertCircle className="size-3" />
+                      <span>{errors.email}</span>
+                    </p>
                   )}
                 </div>
 
@@ -495,144 +543,134 @@ export function RegisterPage() {
                       setPhone(e.target.value);
                       if (errors.phone) setErrors((prev) => ({ ...prev, phone: "" }));
                     }}
-                    placeholder="Phone Number"
-                    className="block w-full rounded-xl sm:rounded-2xl border border-gray-200 bg-white py-2.5 pl-10 pr-3 text-xs sm:text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-[#E6007A] focus:ring-1 focus:ring-[#E6007A]"
+                    onBlur={() => {
+                      const err = validatePhone(phone);
+                      if (err) setErrors((prev) => ({ ...prev, phone: err }));
+                    }}
+                    placeholder="Phone Number (e.g. 0712 345 678)"
+                    className={`block w-full rounded-xl sm:rounded-2xl border bg-white py-2.5 pl-10 pr-3 text-xs sm:text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none transition-all ${
+                      errors.phone
+                        ? "border-destructive focus:border-destructive ring-1 ring-destructive/20"
+                        : "border-gray-200 focus:border-[#E6007A] focus:ring-1 focus:ring-[#E6007A]"
+                    }`}
                   />
                   {errors.phone && (
-                    <p className="text-[10.5px] font-medium text-destructive mt-0.5 pl-2">{errors.phone}</p>
+                    <p className="text-[10.5px] font-medium text-destructive mt-0.5 pl-2 flex items-center gap-1">
+                      <AlertCircle className="size-3" />
+                      <span>{errors.phone}</span>
+                    </p>
                   )}
                 </div>
 
                 {/* 4. Password & Confirm Password (Side by side) */}
-                <div className="grid gap-2 grid-cols-2">
-                  <div className="relative">
-                    <Lock className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-gray-400" />
-                    <input
-                      id="reg-pwd"
-                      type={showPassword ? "text" : "password"}
-                      autoComplete="new-password"
-                      required
-                      value={password}
-                      onChange={(e) => {
-                        setPassword(e.target.value);
-                        if (errors.password) setErrors((prev) => ({ ...prev, password: "" }));
-                      }}
-                      placeholder="Password"
-                      className="block w-full rounded-xl sm:rounded-2xl border border-gray-200 bg-white py-2.5 pl-8 pr-7 text-xs sm:text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-[#E6007A] focus:ring-1 focus:ring-[#E6007A]"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
-                    >
-                      {showPassword ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
-                    </button>
-                  </div>
-
-                  <div className="relative">
-                    <Lock className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-gray-400" />
-                    <input
-                      id="reg-confirm"
-                      type={showConfirmPassword ? "text" : "password"}
-                      autoComplete="new-password"
-                      required
-                      value={confirmPassword}
-                      onChange={(e) => {
-                        setConfirmPassword(e.target.value);
-                        if (errors.confirmPassword) setErrors((prev) => ({ ...prev, confirmPassword: "" }));
-                      }}
-                      placeholder="Confirm Password"
-                      className="block w-full rounded-xl sm:rounded-2xl border border-gray-200 bg-white py-2.5 pl-8 pr-7 text-xs sm:text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-[#E6007A] focus:ring-1 focus:ring-[#E6007A]"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
-                    >
-                      {showConfirmPassword ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
-                    </button>
-                  </div>
-                </div>
-                {(errors.password || errors.confirmPassword) && (
-                  <p className="text-[10.5px] font-medium text-destructive mt-0.5 pl-2">
-                    {errors.password || errors.confirmPassword}
-                  </p>
-                )}
-
-                {/* 5. Location Dropdowns */}
-                <div className="pt-1 space-y-1">
-                  <p className="text-[11px] font-semibold text-gray-800">
-                    Your Location (for delivery)
-                  </p>
-                  <div className="grid grid-cols-3 gap-1.5">
-                    {/* Region */}
-                    <div className="relative">
-                      <MapPin className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 size-3 text-gray-400" />
-                      <select
-                        value={region}
-                        onChange={(e) => handleRegionChange(e.target.value)}
-                        className="block w-full appearance-none rounded-xl border border-gray-200 bg-white py-2 pl-6 pr-5 text-[11px] text-gray-700 focus:outline-none focus:border-[#E6007A]"
-                      >
-                        {regionNames.map((r) => (
-                          <option key={r} value={r}>
-                            {r}
-                          </option>
-                        ))}
-                      </select>
-                      <ChevronDown className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 size-3 text-gray-400" />
-                    </div>
-
-                    {/* District */}
-                    <div className="relative">
-                      <Building className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 size-3 text-gray-400" />
-                      <select
-                        value={district}
-                        onChange={(e) => setDistrict(e.target.value)}
-                        className="block w-full appearance-none rounded-xl border border-gray-200 bg-white py-2 pl-6 pr-5 text-[11px] text-gray-700 focus:outline-none focus:border-[#E6007A]"
-                      >
-                        {tanzaniaRegionsData[region]?.districts.map((d) => (
-                          <option key={d} value={d}>
-                            {d}
-                          </option>
-                        ))}
-                      </select>
-                      <ChevronDown className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 size-3 text-gray-400" />
-                    </div>
-
-                    {/* Ward */}
-                    <div className="relative">
-                      <MapPin className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 size-3 text-gray-400" />
-                      <select
-                        value={ward}
-                        onChange={(e) => setWard(e.target.value)}
-                        className="block w-full appearance-none rounded-xl border border-gray-200 bg-white py-2 pl-6 pr-5 text-[11px] text-gray-700 focus:outline-none focus:border-[#E6007A]"
-                      >
-                        {tanzaniaRegionsData[region]?.wards.map((w) => (
-                          <option key={w} value={w}>
-                            {w}
-                          </option>
-                        ))}
-                      </select>
-                      <ChevronDown className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 size-3 text-gray-400" />
-                    </div>
-                  </div>
-                </div>
-
-                {/* 6. Detailed Address (Optional) */}
                 <div className="space-y-1">
-                  <p className="text-[11px] font-semibold text-gray-800">
-                    Detailed Address (Optional)
-                  </p>
-                  <div className="relative">
-                    <Home className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-gray-400" />
-                    <input
-                      type="text"
-                      value={detailedAddress}
-                      onChange={(e) => setDetailedAddress(e.target.value)}
-                      placeholder="e.g. House number, street, area, landmark"
-                      className="block w-full rounded-xl sm:rounded-2xl border border-gray-200 bg-white py-2.5 pl-9 pr-3 text-xs sm:text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-[#E6007A] focus:ring-1 focus:ring-[#E6007A]"
-                    />
+                  <div className="grid gap-2 grid-cols-2">
+                    <div className="relative">
+                      <Lock className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-gray-400" />
+                      <input
+                        id="reg-pwd"
+                        type={showPassword ? "text" : "password"}
+                        autoComplete="new-password"
+                        required
+                        value={password}
+                        onChange={(e) => {
+                          setPassword(e.target.value);
+                          if (errors.password) setErrors((prev) => ({ ...prev, password: "" }));
+                        }}
+                        onBlur={() => {
+                          const err = validatePassword(password);
+                          if (err) setErrors((prev) => ({ ...prev, password: err }));
+                        }}
+                        placeholder="Password (min 8 chars)"
+                        className={`block w-full rounded-xl sm:rounded-2xl border bg-white py-2.5 pl-8 pr-7 text-xs sm:text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none transition-all ${
+                          errors.password
+                            ? "border-destructive focus:border-destructive ring-1 ring-destructive/20"
+                            : "border-gray-200 focus:border-[#E6007A] focus:ring-1 focus:ring-[#E6007A]"
+                        }`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
+                      >
+                        {showPassword ? (
+                          <EyeOff className="size-3.5" />
+                        ) : (
+                          <Eye className="size-3.5" />
+                        )}
+                      </button>
+                    </div>
+
+                    <div className="relative">
+                      <Lock className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-gray-400" />
+                      <input
+                        id="reg-confirm"
+                        type={showConfirmPassword ? "text" : "password"}
+                        autoComplete="new-password"
+                        required
+                        value={confirmPassword}
+                        onChange={(e) => {
+                          setConfirmPassword(e.target.value);
+                          if (errors.confirmPassword)
+                            setErrors((prev) => ({ ...prev, confirmPassword: "" }));
+                        }}
+                        onBlur={() => {
+                          const err = validateConfirmPassword(password, confirmPassword);
+                          if (err) setErrors((prev) => ({ ...prev, confirmPassword: err }));
+                        }}
+                        placeholder="Confirm Password"
+                        className={`block w-full rounded-xl sm:rounded-2xl border bg-white py-2.5 pl-8 pr-7 text-xs sm:text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none transition-all ${
+                          errors.confirmPassword
+                            ? "border-destructive focus:border-destructive ring-1 ring-destructive/20"
+                            : "border-gray-200 focus:border-[#E6007A] focus:ring-1 focus:ring-[#E6007A]"
+                        }`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
+                      >
+                        {showConfirmPassword ? (
+                          <EyeOff className="size-3.5" />
+                        ) : (
+                          <Eye className="size-3.5" />
+                        )}
+                      </button>
+                    </div>
                   </div>
+
+                  {/* Password Strength Indicator */}
+                  {password && (
+                    <div className="px-1 pt-1 space-y-1">
+                      <div className="flex items-center justify-between text-[10px]">
+                        <span className="text-gray-500 font-medium">Strength:</span>
+                        <span
+                          className={`font-bold ${
+                            getPasswordStrength(password).label === "Strong"
+                              ? "text-emerald-600"
+                              : getPasswordStrength(password).label === "Fair"
+                                ? "text-amber-600"
+                                : "text-rose-600"
+                          }`}
+                        >
+                          {getPasswordStrength(password).label}
+                        </span>
+                      </div>
+                      <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full transition-all duration-300 ${getPasswordStrength(password).color}`}
+                          style={{ width: `${getPasswordStrength(password).percent}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {(errors.password || errors.confirmPassword) && (
+                    <p className="text-[10.5px] font-medium text-destructive mt-0.5 pl-2 flex items-center gap-1">
+                      <AlertCircle className="size-3" />
+                      <span>{errors.password || errors.confirmPassword}</span>
+                    </p>
+                  )}
                 </div>
 
                 {/* 7. Terms & Conditions */}
@@ -650,9 +688,7 @@ export function RegisterPage() {
                         Terms and Conditions
                       </span>{" "}
                       and{" "}
-                      <span className="font-semibold text-[#E6007A] underline">
-                        Privacy Policy
-                      </span>
+                      <span className="font-semibold text-[#E6007A] underline">Privacy Policy</span>
                     </span>
                   </label>
                   {errors.agreeTerms && (

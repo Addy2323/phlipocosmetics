@@ -4,7 +4,7 @@ import * as schema from "../../drizzle/schema";
 
 const connectionString =
   process.env["DATABASE_URL"] ||
-  "postgresql://postgres:myamba2323@127.0.0.1:5432/philipo?schema=public";
+  "postgresql://postgres:myamba2323@127.0.0.1:5432/philipo";
 
 // Singleton query client for PostgreSQL
 export const queryClient = postgres(connectionString, {

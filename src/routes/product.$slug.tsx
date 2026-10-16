@@ -1,20 +1,40 @@
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
-import { Star, Truck, RotateCcw, Minus, Plus, Check, ShieldCheck, ShoppingBag, Zap } from "lucide-react";
+import { useState, useEffect } from "react";
+import {
+  Star,
+  Truck,
+  RotateCcw,
+  Minus,
+  Plus,
+  Check,
+  ShieldCheck,
+  ShoppingBag,
+  Zap,
+} from "lucide-react";
 import { Site } from "@/components/Site";
 import { ProductCard } from "@/components/ProductCard";
 import { products, money } from "@/data/shop";
+import { getStoredProducts, PRODUCTS_UPDATE_EVENT } from "@/lib/products-store";
 import { useCart } from "@/lib/cart";
 
 export const Route = createFileRoute("/product/$slug")({
   loader: ({ params }) => {
-    const product = products.find((p) => p.slug === params.slug);
-    if (!product) throw notFound();
+    const list = typeof window !== "undefined" ? getStoredProducts() : products;
+    let product = list.find((p) => p.slug === params.slug);
+    if (!product) {
+      product = products.find((p) => p.slug === params.slug);
+    }
+    if (!product || product.isArchived) throw notFound();
     return { product };
   },
   head: ({ loaderData }) => {
     if (!loaderData) {
-      return { meta: [{ title: "Product not found — Philipo Cosmetics" }, { name: "robots", content: "noindex" }] };
+      return {
+        meta: [
+          { title: "Product not found — Philipo Cosmetics" },
+          { name: "robots", content: "noindex" },
+        ],
+      };
     }
     const { product } = loaderData;
     return {
@@ -30,7 +50,23 @@ export const Route = createFileRoute("/product/$slug")({
 });
 
 function ProductDetail() {
-  const { product } = Route.useLoaderData();
+  const { product: initialProduct } = Route.useLoaderData();
+  const [product, setProduct] = useState(initialProduct);
+
+  useEffect(() => {
+    const handleUpdate = () => {
+      const stored = getStoredProducts().find((p) => p.slug === initialProduct.slug || p.id === initialProduct.id);
+      if (stored) setProduct(stored);
+    };
+    handleUpdate();
+    window.addEventListener(PRODUCTS_UPDATE_EVENT, handleUpdate);
+    window.addEventListener("storage", handleUpdate);
+    return () => {
+      window.removeEventListener(PRODUCTS_UPDATE_EVENT, handleUpdate);
+      window.removeEventListener("storage", handleUpdate);
+    };
+  }, [initialProduct.slug, initialProduct.id]);
+
   const { add, setDrawerOpen } = useCart();
   const navigate = useNavigate();
   const [qty, setQty] = useState(1);
@@ -46,11 +82,17 @@ function ProductDetail() {
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
         {/* Breadcrumb */}
         <nav className="text-xs text-muted-foreground flex items-center gap-1.5">
-          <Link to="/" className="hover:text-primary">Home</Link>
+          <Link to="/" className="hover:text-primary">
+            Home
+          </Link>
           <span>/</span>
-          <Link to="/shop" search={{ category: "All" }} className="hover:text-primary">Shop</Link>
+          <Link to="/shop" search={{ category: "All" }} className="hover:text-primary">
+            Shop
+          </Link>
           <span>/</span>
-          <Link to="/shop" search={{ category: product.category }} className="hover:text-primary">{product.category}</Link>
+          <Link to="/shop" search={{ category: product.category }} className="hover:text-primary">
+            {product.category}
+          </Link>
           <span>/</span>
           <span className="text-foreground font-medium truncate max-w-xs">{product.name}</span>
         </nav>
@@ -113,11 +155,13 @@ function ProductDetail() {
             <div className="mt-4 flex items-center gap-2 text-xs">
               {available > 10 ? (
                 <span className="flex items-center gap-1.5 font-medium text-emerald-600">
-                  <span className="size-2 rounded-full bg-emerald-600 animate-pulse" /> In Stock ({available} units available for express dispatch)
+                  <span className="size-2 rounded-full bg-emerald-600 animate-pulse" /> In Stock (
+                  {available} units available for express dispatch)
                 </span>
               ) : (
                 <span className="flex items-center gap-1.5 font-medium text-amber-600">
-                  <span className="size-2 rounded-full bg-amber-600" /> Only {available} left in stock
+                  <span className="size-2 rounded-full bg-amber-600" /> Only {available} left in
+                  stock
                 </span>
               )}
             </div>
@@ -128,7 +172,9 @@ function ProductDetail() {
 
             {/* Specifications / Highlights */}
             <div className="mt-6 space-y-2.5 rounded-2xl bg-secondary/40 p-4 border border-secondary">
-              <p className="text-xs font-semibold text-foreground uppercase tracking-wider">Formula Highlights</p>
+              <p className="text-xs font-semibold text-foreground uppercase tracking-wider">
+                Formula Highlights
+              </p>
               <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
                 {product.details.map((d) => (
                   <li key={d} className="flex items-center gap-2">

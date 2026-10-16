@@ -67,39 +67,44 @@ export function MobileProductCard({ product }: { product: Product }) {
           </h3>
         </Link>
 
-        {/* Rating */}
-        <div className="flex items-center gap-1 mt-1">
-          <div className="flex items-center gap-0.5">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Star
-                key={i}
-                className={`size-2.5 ${
-                  i < Math.floor(product.rating)
-                    ? "fill-[#C6A56B] text-[#C6A56B]"
-                    : "text-border"
-                }`}
-              />
-            ))}
+        {/* Stock status & review count */}
+        <div className="flex items-center justify-between text-[9px] text-[#77747C] mt-1">
+          <div className="flex items-center gap-1">
+            <div className="flex items-center gap-0.5">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Star
+                  key={i}
+                  className={`size-2.5 ${
+                    i < Math.floor(product.rating)
+                      ? "fill-[#C6A56B] text-[#C6A56B]"
+                      : "text-border"
+                  }`}
+                />
+              ))}
+            </div>
+            <span>({product.reviews})</span>
           </div>
-          <span className="text-[9px] text-[#77747C]">({product.reviews})</span>
+          <span className={`font-medium ${product.stock <= 10 ? "text-amber-600" : "text-emerald-600"}`}>
+            {product.stock <= 10 ? `Only ${product.stock} left` : "In stock"}
+          </span>
         </div>
 
-        {/* Price */}
-        <div className="flex items-center justify-between mt-1.5">
-          <div className="flex items-baseline gap-1">
+        {/* Price & Add to Cart button */}
+        <div className="flex items-center justify-between mt-2 pt-1 border-t border-border/40">
+          <div className="flex flex-col">
             <span className="text-xs font-bold text-[#243B90]">{money(product.price)}</span>
             {product.compareAt && (
               <span className="text-[9px] text-[#77747C] line-through">{money(product.compareAt)}</span>
             )}
           </div>
-          {/* Add to cart icon button */}
+          {/* Circular Pink Add to cart button */}
           <button
             onClick={() => {
               add(product.id);
               setDrawerOpen(true);
             }}
             aria-label={`Add ${product.name} to bag`}
-            className="grid size-7 place-items-center rounded-lg bg-[#EC008C] text-white shadow-sm hover:bg-[#D4006F] transition-colors active:scale-90"
+            className="grid size-8 place-items-center rounded-full bg-[#EC008C] text-white shadow-sm hover:bg-[#D4006F] transition-all active:scale-90"
           >
             <ShoppingBag className="size-3.5" />
           </button>

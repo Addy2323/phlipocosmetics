@@ -7,9 +7,7 @@ export const Route = createFileRoute("/auth")({
     mode: typeof search.mode === "string" ? search.mode : undefined,
   }),
   head: () => ({
-    meta: [
-      { title: "Authentication — Philipo Cosmetics" },
-    ],
+    meta: [{ title: "Authentication — Philipo Cosmetics" }],
   }),
   component: AuthRedirect,
 });

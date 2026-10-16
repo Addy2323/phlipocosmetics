@@ -1,6 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Search, MessageSquare, Phone, Mail, UserCheck, Send, CheckCircle2, AlertCircle } from "lucide-react";
+import {
+  Search,
+  MessageSquare,
+  Phone,
+  Mail,
+  UserCheck,
+  Send,
+  CheckCircle2,
+  AlertCircle,
+} from "lucide-react";
 import { ErpPage, StatusPill } from "@/components/Erp";
 import { getSMSLogs } from "@/lib/erp-service";
 import type { schema } from "@/lib/db";
@@ -9,7 +18,10 @@ export const Route = createFileRoute("/erp/support")({
   head: () => ({
     meta: [
       { title: "Customer Service — Philipo ERP" },
-      { name: "description", content: "Customer support console, phone lookup, and SMS dispatch history." },
+      {
+        name: "description",
+        content: "Customer support console, phone lookup, and SMS dispatch history.",
+      },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -47,7 +59,9 @@ function CustomerSupport() {
       <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
         <div className="card-surface p-5 space-y-4">
           <h2 className="font-display text-xl">Baraka SMS Transmission Logs</h2>
-          <p className="text-xs text-muted-foreground">Automated customer SMS notifications for order confirmations & salon appointments.</p>
+          <p className="text-xs text-muted-foreground">
+            Automated customer SMS notifications for order confirmations & salon appointments.
+          </p>
 
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -64,7 +78,9 @@ function CustomerSupport() {
                   <tr key={log.id} className="border-b last:border-0 hover:bg-secondary/30">
                     <td className="py-2.5 font-medium">{log.recipient}</td>
                     <td className="py-2.5 text-xs max-w-xs truncate">{log.message}</td>
-                    <td className="py-2.5 text-xs text-muted-foreground">{log.referenceType ?? "Order"}</td>
+                    <td className="py-2.5 text-xs text-muted-foreground">
+                      {log.referenceType ?? "Order"}
+                    </td>
                     <td className="py-2.5">
                       <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">
                         <CheckCircle2 className="size-3" /> Delivered
@@ -86,11 +102,15 @@ function CustomerSupport() {
 
         <div className="card-surface p-5 space-y-4">
           <h2 className="font-display text-xl">Quick Dispatch SMS</h2>
-          <p className="text-xs text-muted-foreground">Send custom update or notification to a customer phone number.</p>
+          <p className="text-xs text-muted-foreground">
+            Send custom update or notification to a customer phone number.
+          </p>
 
           <form onSubmit={handleSendCustomSMS} className="space-y-3">
             <div>
-              <label className="text-xs font-medium text-muted-foreground">Customer Phone (+255...)</label>
+              <label className="text-xs font-medium text-muted-foreground">
+                Customer Phone (+255...)
+              </label>
               <input
                 required
                 value={smsPhone}

@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { products, type Product } from "@/data/shop";
+import { getStoredProducts } from "@/lib/products-store";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 
@@ -106,8 +107,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [lines, userId]);
 
   const value = useMemo<CartCtx>(() => {
+    const catalog = getStoredProducts();
     const detailed = lines
-      .map((l) => ({ product: products.find((p) => p.id === l.id)!, qty: l.qty }))
+      .map((l) => ({
+        product: (catalog.find((p) => p.id === l.id) || products.find((p) => p.id === l.id))!,
+        qty: l.qty,
+      }))
       .filter((l) => Boolean(l.product));
     return {
       lines,

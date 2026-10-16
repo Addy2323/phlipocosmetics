@@ -74,7 +74,9 @@ function Inventory() {
         <div className="mb-5 flex items-start gap-3 rounded-xl border border-warning/40 bg-warning/10 p-4 text-sm">
           <AlertTriangle className="mt-0.5 size-4 shrink-0 text-warning" />
           <p>
-            <span className="font-medium">{low.length} item(s) at or below reorder level (≤10):</span>{" "}
+            <span className="font-medium">
+              {low.length} item(s) at or below reorder level (≤10):
+            </span>{" "}
             {low.map((p) => p.name).join(", ")}. Restock suggested.
           </p>
         </div>
@@ -134,12 +136,20 @@ function Inventory() {
           {selectedProd ? (
             <form onSubmit={handleAdjustStock} className="mt-4 space-y-3">
               <div>
-                <label className="text-xs font-medium text-muted-foreground">Target Product ID</label>
-                <input disabled value={selectedProd} className="mt-1 w-full rounded-lg border bg-muted p-2 text-xs font-mono" />
+                <label className="text-xs font-medium text-muted-foreground">
+                  Target Product ID
+                </label>
+                <input
+                  disabled
+                  value={selectedProd}
+                  className="mt-1 w-full rounded-lg border bg-muted p-2 text-xs font-mono"
+                />
               </div>
 
               <div>
-                <label className="text-xs font-medium text-muted-foreground">Adjustment Quantity (+ to add, - to reduce)</label>
+                <label className="text-xs font-medium text-muted-foreground">
+                  Adjustment Quantity (+ to add, - to reduce)
+                </label>
                 <input
                   type="number"
                   value={adjustQty}
@@ -149,7 +159,9 @@ function Inventory() {
               </div>
 
               <div>
-                <label className="text-xs font-medium text-muted-foreground">Reason / Movement Type</label>
+                <label className="text-xs font-medium text-muted-foreground">
+                  Reason / Movement Type
+                </label>
                 <select
                   value={adjustReason}
                   onChange={(e) => setAdjustReason(e.target.value)}
@@ -166,14 +178,19 @@ function Inventory() {
                 <button type="submit" disabled={busy} className="btn-base btn-primary flex-1 h-10">
                   Confirm Adjustment
                 </button>
-                <button type="button" onClick={() => setSelectedProd(null)} className="btn-base btn-outline h-10">
+                <button
+                  type="button"
+                  onClick={() => setSelectedProd(null)}
+                  className="btn-base btn-outline h-10"
+                >
                   Cancel
                 </button>
               </div>
             </form>
           ) : (
             <p className="mt-4 text-xs text-muted-foreground">
-              Select a product from the table on the left to add stock, record goods receipt, or adjust inventory balances.
+              Select a product from the table on the left to add stock, record goods receipt, or
+              adjust inventory balances.
             </p>
           )}
         </div>

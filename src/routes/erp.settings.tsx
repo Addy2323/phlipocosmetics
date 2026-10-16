@@ -1,16 +1,28 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Settings as SettingsIcon, Shield, Key, Building, CheckCircle2, UserCog } from "lucide-react";
+import {
+  Settings as SettingsIcon,
+  Shield,
+  Key,
+  Building,
+  CheckCircle2,
+  UserCog,
+} from "lucide-react";
 import { ErpPage } from "@/components/Erp";
 import { useAuth } from "@/lib/auth";
 import { updateUserRole, type UserRole } from "@/lib/auth-server";
 import { db, schema } from "@/lib/db";
+import { toast } from "@/components/ui/sonner";
 
 export const Route = createFileRoute("/erp/settings")({
   head: () => ({
     meta: [
       { title: "System Settings — Philipo ERP" },
-      { name: "description", content: "Business profile, tax settings, SMS gateway credentials, and staff access control." },
+      {
+        name: "description",
+        content:
+          "Business profile, tax settings, SMS gateway credentials, and staff access control.",
+      },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -47,7 +59,9 @@ function Settings() {
       await loadUsers();
       setTimeout(() => setStatusMsg(null), 3000);
     } catch (err: any) {
-      alert(err.message || "Failed to update user role");
+      toast.error("Failed to update user role", {
+        description: err.message || "An error occurred while updating role.",
+      });
     }
   }
 
@@ -64,17 +78,33 @@ function Settings() {
           <div className="space-y-3 text-sm">
             <div>
               <label className="text-xs font-medium text-muted-foreground">Business Name</label>
-              <input disabled value="Philipo Cosmetics Tanzania Limited" className="mt-1 w-full rounded-lg border bg-muted p-2.5 text-sm" />
+              <input
+                disabled
+                value="Philipo Cosmetics Tanzania Limited"
+                className="mt-1 w-full rounded-lg border bg-muted p-2.5 text-sm"
+              />
             </div>
 
             <div>
-              <label className="text-xs font-medium text-muted-foreground">TIN (Taxpayer Identification Number)</label>
-              <input disabled value="109-842-771" className="mt-1 w-full rounded-lg border bg-muted p-2.5 font-mono text-sm" />
+              <label className="text-xs font-medium text-muted-foreground">
+                TIN (Taxpayer Identification Number)
+              </label>
+              <input
+                disabled
+                value="109-842-771"
+                className="mt-1 w-full rounded-lg border bg-muted p-2.5 font-mono text-sm"
+              />
             </div>
 
             <div>
-              <label className="text-xs font-medium text-muted-foreground">Headquarters Address</label>
-              <input disabled value="Samora Avenue, Posta Mpya, Dar es Salaam, Tanzania" className="mt-1 w-full rounded-lg border bg-muted p-2.5 text-sm" />
+              <label className="text-xs font-medium text-muted-foreground">
+                Headquarters Address
+              </label>
+              <input
+                disabled
+                value="Samora Avenue, Posta Mpya, Dar es Salaam, Tanzania"
+                className="mt-1 w-full rounded-lg border bg-muted p-2.5 text-sm"
+              />
             </div>
           </div>
         </div>
@@ -113,7 +143,9 @@ function Settings() {
             <UserCog className="size-5 text-primary" /> Staff Accounts & RBAC Authorization Manager
           </div>
           {statusMsg && (
-            <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">{statusMsg}</span>
+            <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
+              {statusMsg}
+            </span>
           )}
         </div>
 
@@ -153,7 +185,9 @@ function Settings() {
                         <option value="customer">customer</option>
                       </select>
                     ) : (
-                      <span className="text-xs text-muted-foreground">Admin permission required</span>
+                      <span className="text-xs text-muted-foreground">
+                        Admin permission required
+                      </span>
                     )}
                   </td>
                 </tr>

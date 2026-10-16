@@ -17,7 +17,15 @@ export const Route = createFileRoute("/erp/orders")({
   component: Orders,
 });
 
-const filters = ["All", "Paid", "Processing", "Preparing", "Out for Delivery", "Delivered", "Cancelled"] as const;
+const filters = [
+  "All",
+  "Paid",
+  "Processing",
+  "Preparing",
+  "Out for Delivery",
+  "Delivered",
+  "Cancelled",
+] as const;
 
 function Orders() {
   const [orders, setOrders] = useState<Array<typeof schema.orders.$inferSelect>>([]);
@@ -59,7 +67,7 @@ function Orders() {
       (filter === "All" || o.fulfillmentStatus === filter || o.paymentStatus === filter) &&
       (o.customerName.toLowerCase().includes(query.toLowerCase()) ||
         o.orderNumber.toLowerCase().includes(query.toLowerCase()) ||
-        o.customerPhone.includes(query))
+        o.customerPhone.includes(query)),
   );
 
   return (
@@ -88,7 +96,9 @@ function Orders() {
               key={f}
               onClick={() => setFilter(f)}
               className={`rounded-full px-3.5 py-2 text-xs font-medium transition-colors ${
-                filter === f ? "bg-primary text-primary-foreground" : "bg-card border hover:bg-secondary"
+                filter === f
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-card border hover:bg-secondary"
               }`}
             >
               {f}
@@ -113,7 +123,10 @@ function Orders() {
           </thead>
           <tbody>
             {rows.map((o) => (
-              <tr key={o.id} className="border-b last:border-0 hover:bg-secondary/40 transition-colors">
+              <tr
+                key={o.id}
+                className="border-b last:border-0 hover:bg-secondary/40 transition-colors"
+              >
                 <td className="p-2.5 font-medium">{o.orderNumber}</td>
                 <td className="p-2.5">
                   <p className="font-medium">{o.customerName}</p>
@@ -121,7 +134,9 @@ function Orders() {
                 </td>
                 <td className="p-2.5">
                   <p className="text-xs font-medium">{o.deliveryCity}</p>
-                  <p className="text-[11px] text-muted-foreground truncate max-w-[150px]">{o.deliveryArea}</p>
+                  <p className="text-[11px] text-muted-foreground truncate max-w-[150px]">
+                    {o.deliveryArea}
+                  </p>
                 </td>
                 <td className="p-2.5 text-muted-foreground">{o.channel}</td>
                 <td className="p-2.5 font-medium">{money(o.total)}</td>

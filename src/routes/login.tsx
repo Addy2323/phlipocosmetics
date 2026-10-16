@@ -84,34 +84,48 @@ export function LoginPage() {
   // Redirect if already authenticated
   useEffect(() => {
     if (!loading && user) {
-      if (
-        user.role === "admin" ||
-        user.role === "sales_staff" ||
-        user.role === "customer_service" ||
-        user.role === "stylist"
-      ) {
-        navigate({ to: "/erp" });
+      if (user.role === "admin") {
+        navigate({ to: "/admin/dashboard" });
+      } else if (user.role === "sales" || user.role === "sales_staff") {
+        navigate({ to: "/sales/dashboard" });
       } else {
         navigate({ to: "/account" });
       }
     }
   }, [loading, user, navigate]);
 
-  function validate(): boolean {
-    let valid = true;
-    setIdentifierError(null);
-    setPasswordError(null);
-    setErrorMessage(null);
+  function validateIdentifier(val: string): string | null {
+    const clean = val.trim();
+    if (!clean) return "Please enter your email address.";
+    if (clean.includes("@")) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(clean)) {
+        return "Please enter a valid email address (e.g. name@example.com).";
+      }
+    } else if (/^\+?\d[\d\s-]{5,}$/.test(clean)) {
+      const digits = clean.replace(/\D/g, "");
+      if (digits.length < 9 || digits.length > 13) {
+        return "Please enter a valid phone number (e.g. 0712 345 678 or +255 744 281 673).";
+      }
+    } else {
+      return "Please enter a valid email address (e.g. name@example.com).";
+    }
+    return null;
+  }
 
-    if (!identifier.trim()) {
-      setIdentifierError("Please enter your email or username");
-      valid = false;
-    }
-    if (!password) {
-      setPasswordError("Please enter your password");
-      valid = false;
-    }
-    return valid;
+  function validatePassword(val: string): string | null {
+    if (!val) return "Please enter your password.";
+    if (val.length < 6) return "Password must be at least 6 characters long.";
+    return null;
+  }
+
+  function validate(): boolean {
+    const idErr = validateIdentifier(identifier);
+    const passErr = validatePassword(password);
+    setIdentifierError(idErr);
+    setPasswordError(passErr);
+    setErrorMessage(null);
+    return !idErr && !passErr;
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -132,10 +146,12 @@ export function LoginPage() {
         signIn(sessionUser);
         setSuccessMessage("Welcome back! Redirecting...");
         setTimeout(() => {
-          if (sessionUser.role === "customer") {
-            navigate({ to: "/account" });
+          if (sessionUser.role === "admin") {
+            navigate({ to: "/admin/dashboard" });
+          } else if (sessionUser.role === "sales" || sessionUser.role === "sales_staff") {
+            navigate({ to: "/sales/dashboard" });
           } else {
-            navigate({ to: "/erp" });
+            navigate({ to: "/account" });
           }
         }, 400);
       } catch (authErr) {
@@ -264,7 +280,9 @@ export function LoginPage() {
                   <ShoppingBag className="size-5" />
                 </div>
                 <span className="mt-2 text-[11px] font-medium text-gray-700 leading-tight">
-                  Manage<br />Products
+                  Manage
+                  <br />
+                  Products
                 </span>
               </div>
 
@@ -273,7 +291,9 @@ export function LoginPage() {
                   <Calendar className="size-5" />
                 </div>
                 <span className="mt-2 text-[11px] font-medium text-gray-700 leading-tight">
-                  Handle<br />Appointments
+                  Handle
+                  <br />
+                  Appointments
                 </span>
               </div>
 
@@ -282,7 +302,9 @@ export function LoginPage() {
                   <Package className="size-5" />
                 </div>
                 <span className="mt-2 text-[11px] font-medium text-gray-700 leading-tight">
-                  Track<br />Orders
+                  Track
+                  <br />
+                  Orders
                 </span>
               </div>
 
@@ -291,7 +313,9 @@ export function LoginPage() {
                   <BarChart3 className="size-5" />
                 </div>
                 <span className="mt-2 text-[11px] font-medium text-gray-700 leading-tight">
-                  View<br />Reports
+                  View
+                  <br />
+                  Reports
                 </span>
               </div>
             </div>
@@ -305,16 +329,26 @@ export function LoginPage() {
                 <h2 className="font-display text-3xl font-medium tracking-tight text-[#1A1A24]">
                   Sign In
                 </h2>
-                <p className="text-xs text-gray-500">
-                  Access your Philipo Cosmetics account
-                </p>
+                <p className="text-xs text-gray-500">Access your Philipo Cosmetics account</p>
               </div>
 
               {/* Status Notifications */}
               {errorMessage && (
-                <div className="mb-3 flex items-start gap-2 rounded-xl bg-destructive/10 p-2.5 text-xs text-destructive border border-destructive/20 animate-in fade-in">
-                  <AlertCircle className="size-4 shrink-0 mt-0.5" />
-                  <span className="leading-tight">{errorMessage}</span>
+                <div className="mb-3 flex items-start gap-2 rounded-xl bg-destructive/10 p-3 text-xs text-destructive border border-destructive/20 animate-in fade-in">
+                  <AlertCircle className="size-4 shrink-0 mt-0.5 text-destructive" />
+                  <div className="leading-tight">
+                    <span>{errorMessage}</span>
+                    {errorMessage.includes("create an account") && (
+                      <div className="mt-1.5">
+                        <Link
+                          to="/register"
+                          className="inline-flex items-center gap-1 font-bold text-[#E6007A] underline hover:text-[#C70068]"
+                        >
+                          Click here to create your account now →
+                        </Link>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 
@@ -327,20 +361,25 @@ export function LoginPage() {
 
               {/* Sign In Form */}
               <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
-                {/* 1. Email or Username */}
+                {/* 1. Email Address */}
                 <div className="relative">
                   <Mail className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
                   <input
                     id="signin-id"
                     type="text"
-                    autoComplete="username"
+                    autoComplete="email"
                     required
                     value={identifier}
                     onChange={(e) => {
                       setIdentifier(e.target.value);
                       if (identifierError) setIdentifierError(null);
                     }}
-                    placeholder="Email or Username"
+                    onBlur={() => {
+                      if (identifier.trim()) {
+                        setIdentifierError(validateIdentifier(identifier));
+                      }
+                    }}
+                    placeholder="Email address"
                     className={`block w-full rounded-2xl border bg-white py-3 pl-10 pr-4 text-sm text-gray-900 placeholder:text-gray-400 transition-all focus:outline-none focus:ring-2 focus:ring-[#E6007A]/25 ${
                       identifierError
                         ? "border-destructive focus:border-destructive"
@@ -348,8 +387,9 @@ export function LoginPage() {
                     }`}
                   />
                   {identifierError && (
-                    <p className="text-[11px] font-medium text-destructive mt-0.5 pl-2">
-                      {identifierError}
+                    <p className="text-[11px] font-medium text-destructive mt-0.5 pl-2 flex items-center gap-1">
+                      <AlertCircle className="size-3" />
+                      <span>{identifierError}</span>
                     </p>
                   )}
                 </div>
@@ -367,6 +407,11 @@ export function LoginPage() {
                       setPassword(e.target.value);
                       if (passwordError) setPasswordError(null);
                     }}
+                    onBlur={() => {
+                      if (password) {
+                        setPasswordError(validatePassword(password));
+                      }
+                    }}
                     placeholder="Password"
                     className={`block w-full rounded-2xl border bg-white py-3 pl-10 pr-10 text-sm text-gray-900 placeholder:text-gray-400 transition-all focus:outline-none focus:ring-2 focus:ring-[#E6007A]/25 ${
                       passwordError
@@ -383,8 +428,9 @@ export function LoginPage() {
                     {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                   </button>
                   {passwordError && (
-                    <p className="text-[11px] font-medium text-destructive mt-0.5 pl-2">
-                      {passwordError}
+                    <p className="text-[11px] font-medium text-destructive mt-0.5 pl-2 flex items-center gap-1">
+                      <AlertCircle className="size-3" />
+                      <span>{passwordError}</span>
                     </p>
                   )}
                 </div>
@@ -500,9 +546,7 @@ export function LoginPage() {
 
             <form onSubmit={handleResetPassword} className="space-y-4 pt-1">
               <div className="space-y-1">
-                <label className="block text-xs font-semibold text-gray-700">
-                  Email Address
-                </label>
+                <label className="block text-xs font-semibold text-gray-700">Email Address</label>
                 <input
                   type="email"
                   required

@@ -15,11 +15,26 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CartRouteImport } from './routes/cart'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as ErpRouteImport } from './routes/erp'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as PartnerApplyRouteImport } from './routes/partner-apply'
 import { Route as RegisterRouteImport } from './routes/register'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SalonRouteImport } from './routes/salon'
 import { Route as ShopRouteImport } from './routes/shop'
 import { Route as TrackRouteImport } from './routes/track'
+import { Route as AdminBusinessPartnersRouteImport } from './routes/admin.business-partners'
+import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
+import { Route as AdminCouponsRouteImport } from './routes/admin.coupons'
+import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
+import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
+import { Route as AdminInventoryRouteImport } from './routes/admin.inventory'
+import { Route as AdminInvoicesRouteImport } from './routes/admin.invoices'
+import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
+import { Route as AdminProductsRouteImport } from './routes/admin.products'
+import { Route as AdminReportsRouteImport } from './routes/admin.reports'
+import { Route as AdminReviewsRouteImport } from './routes/admin.reviews'
+import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as ErpIndexRouteImport } from './routes/erp.index'
 import { Route as ErpAuditRouteImport } from './routes/erp.audit'
 import { Route as ErpInventoryRouteImport } from './routes/erp.inventory'
@@ -30,6 +45,7 @@ import { Route as ErpSalonRouteImport } from './routes/erp.salon'
 import { Route as ErpSettingsRouteImport } from './routes/erp.settings'
 import { Route as ErpSupportRouteImport } from './routes/erp.support'
 import { Route as ProductSlugRouteImport } from './routes/product.$slug'
+import { Route as SalesDashboardRouteImport } from './routes/sales.dashboard'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -61,14 +77,29 @@ const ErpRoute = ErpRouteImport.update({
   path: '/erp',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PartnerApplyRoute = PartnerApplyRouteImport.update({
+  id: '/partner-apply',
+  path: '/partner-apply',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SalonRoute = SalonRouteImport.update({
@@ -84,6 +115,66 @@ const ShopRoute = ShopRouteImport.update({
 const TrackRoute = TrackRouteImport.update({
   id: '/track',
   path: '/track',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminBusinessPartnersRoute = AdminBusinessPartnersRouteImport.update({
+  id: '/admin/business-partners',
+  path: '/admin/business-partners',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminCategoriesRoute = AdminCategoriesRouteImport.update({
+  id: '/admin/categories',
+  path: '/admin/categories',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminCouponsRoute = AdminCouponsRouteImport.update({
+  id: '/admin/coupons',
+  path: '/admin/coupons',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminCustomersRoute = AdminCustomersRouteImport.update({
+  id: '/admin/customers',
+  path: '/admin/customers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminDashboardRoute = AdminDashboardRouteImport.update({
+  id: '/admin/dashboard',
+  path: '/admin/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminInventoryRoute = AdminInventoryRouteImport.update({
+  id: '/admin/inventory',
+  path: '/admin/inventory',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminInvoicesRoute = AdminInvoicesRouteImport.update({
+  id: '/admin/invoices',
+  path: '/admin/invoices',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminOrdersRoute = AdminOrdersRouteImport.update({
+  id: '/admin/orders',
+  path: '/admin/orders',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminProductsRoute = AdminProductsRouteImport.update({
+  id: '/admin/products',
+  path: '/admin/products',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminReportsRoute = AdminReportsRouteImport.update({
+  id: '/admin/reports',
+  path: '/admin/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminReviewsRoute = AdminReviewsRouteImport.update({
+  id: '/admin/reviews',
+  path: '/admin/reviews',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/admin/users',
+  path: '/admin/users',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ErpIndexRoute = ErpIndexRouteImport.update({
@@ -136,6 +227,11 @@ const ProductSlugRoute = ProductSlugRouteImport.update({
   path: '/product/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SalesDashboardRoute = SalesDashboardRouteImport.update({
+  id: '/sales/dashboard',
+  path: '/sales/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -144,11 +240,26 @@ export interface FileRoutesByFullPath {
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/erp': typeof ErpRouteWithChildren
+  '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/partner-apply': typeof PartnerApplyRoute
   '/register': typeof RegisterRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/salon': typeof SalonRoute
   '/shop': typeof ShopRoute
   '/track': typeof TrackRoute
+  '/admin/business-partners': typeof AdminBusinessPartnersRoute
+  '/admin/categories': typeof AdminCategoriesRoute
+  '/admin/coupons': typeof AdminCouponsRoute
+  '/admin/customers': typeof AdminCustomersRoute
+  '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/inventory': typeof AdminInventoryRoute
+  '/admin/invoices': typeof AdminInvoicesRoute
+  '/admin/orders': typeof AdminOrdersRoute
+  '/admin/products': typeof AdminProductsRoute
+  '/admin/reports': typeof AdminReportsRoute
+  '/admin/reviews': typeof AdminReviewsRoute
+  '/admin/users': typeof AdminUsersRoute
   '/erp/audit': typeof ErpAuditRoute
   '/erp/inventory': typeof ErpInventoryRoute
   '/erp/orders': typeof ErpOrdersRoute
@@ -158,6 +269,7 @@ export interface FileRoutesByFullPath {
   '/erp/settings': typeof ErpSettingsRoute
   '/erp/support': typeof ErpSupportRoute
   '/product/$slug': typeof ProductSlugRoute
+  '/sales/dashboard': typeof SalesDashboardRoute
   '/erp/': typeof ErpIndexRoute
 }
 export interface FileRoutesByTo {
@@ -166,11 +278,26 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/partner-apply': typeof PartnerApplyRoute
   '/register': typeof RegisterRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/salon': typeof SalonRoute
   '/shop': typeof ShopRoute
   '/track': typeof TrackRoute
+  '/admin/business-partners': typeof AdminBusinessPartnersRoute
+  '/admin/categories': typeof AdminCategoriesRoute
+  '/admin/coupons': typeof AdminCouponsRoute
+  '/admin/customers': typeof AdminCustomersRoute
+  '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/inventory': typeof AdminInventoryRoute
+  '/admin/invoices': typeof AdminInvoicesRoute
+  '/admin/orders': typeof AdminOrdersRoute
+  '/admin/products': typeof AdminProductsRoute
+  '/admin/reports': typeof AdminReportsRoute
+  '/admin/reviews': typeof AdminReviewsRoute
+  '/admin/users': typeof AdminUsersRoute
   '/erp/audit': typeof ErpAuditRoute
   '/erp/inventory': typeof ErpInventoryRoute
   '/erp/orders': typeof ErpOrdersRoute
@@ -180,6 +307,7 @@ export interface FileRoutesByTo {
   '/erp/settings': typeof ErpSettingsRoute
   '/erp/support': typeof ErpSupportRoute
   '/product/$slug': typeof ProductSlugRoute
+  '/sales/dashboard': typeof SalesDashboardRoute
   '/erp': typeof ErpIndexRoute
 }
 export interface FileRoutesById {
@@ -190,11 +318,26 @@ export interface FileRoutesById {
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/erp': typeof ErpRouteWithChildren
+  '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/partner-apply': typeof PartnerApplyRoute
   '/register': typeof RegisterRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/salon': typeof SalonRoute
   '/shop': typeof ShopRoute
   '/track': typeof TrackRoute
+  '/admin/business-partners': typeof AdminBusinessPartnersRoute
+  '/admin/categories': typeof AdminCategoriesRoute
+  '/admin/coupons': typeof AdminCouponsRoute
+  '/admin/customers': typeof AdminCustomersRoute
+  '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/inventory': typeof AdminInventoryRoute
+  '/admin/invoices': typeof AdminInvoicesRoute
+  '/admin/orders': typeof AdminOrdersRoute
+  '/admin/products': typeof AdminProductsRoute
+  '/admin/reports': typeof AdminReportsRoute
+  '/admin/reviews': typeof AdminReviewsRoute
+  '/admin/users': typeof AdminUsersRoute
   '/erp/audit': typeof ErpAuditRoute
   '/erp/inventory': typeof ErpInventoryRoute
   '/erp/orders': typeof ErpOrdersRoute
@@ -204,6 +347,7 @@ export interface FileRoutesById {
   '/erp/settings': typeof ErpSettingsRoute
   '/erp/support': typeof ErpSupportRoute
   '/product/$slug': typeof ProductSlugRoute
+  '/sales/dashboard': typeof SalesDashboardRoute
   '/erp/': typeof ErpIndexRoute
 }
 export interface FileRouteTypes {
@@ -215,11 +359,26 @@ export interface FileRouteTypes {
     | '/cart'
     | '/checkout'
     | '/erp'
+    | '/forgot-password'
     | '/login'
+    | '/partner-apply'
     | '/register'
+    | '/reset-password'
     | '/salon'
     | '/shop'
     | '/track'
+    | '/admin/business-partners'
+    | '/admin/categories'
+    | '/admin/coupons'
+    | '/admin/customers'
+    | '/admin/dashboard'
+    | '/admin/inventory'
+    | '/admin/invoices'
+    | '/admin/orders'
+    | '/admin/products'
+    | '/admin/reports'
+    | '/admin/reviews'
+    | '/admin/users'
     | '/erp/audit'
     | '/erp/inventory'
     | '/erp/orders'
@@ -229,6 +388,7 @@ export interface FileRouteTypes {
     | '/erp/settings'
     | '/erp/support'
     | '/product/$slug'
+    | '/sales/dashboard'
     | '/erp/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -237,11 +397,26 @@ export interface FileRouteTypes {
     | '/auth'
     | '/cart'
     | '/checkout'
+    | '/forgot-password'
     | '/login'
+    | '/partner-apply'
     | '/register'
+    | '/reset-password'
     | '/salon'
     | '/shop'
     | '/track'
+    | '/admin/business-partners'
+    | '/admin/categories'
+    | '/admin/coupons'
+    | '/admin/customers'
+    | '/admin/dashboard'
+    | '/admin/inventory'
+    | '/admin/invoices'
+    | '/admin/orders'
+    | '/admin/products'
+    | '/admin/reports'
+    | '/admin/reviews'
+    | '/admin/users'
     | '/erp/audit'
     | '/erp/inventory'
     | '/erp/orders'
@@ -251,6 +426,7 @@ export interface FileRouteTypes {
     | '/erp/settings'
     | '/erp/support'
     | '/product/$slug'
+    | '/sales/dashboard'
     | '/erp'
   id:
     | '__root__'
@@ -260,11 +436,26 @@ export interface FileRouteTypes {
     | '/cart'
     | '/checkout'
     | '/erp'
+    | '/forgot-password'
     | '/login'
+    | '/partner-apply'
     | '/register'
+    | '/reset-password'
     | '/salon'
     | '/shop'
     | '/track'
+    | '/admin/business-partners'
+    | '/admin/categories'
+    | '/admin/coupons'
+    | '/admin/customers'
+    | '/admin/dashboard'
+    | '/admin/inventory'
+    | '/admin/invoices'
+    | '/admin/orders'
+    | '/admin/products'
+    | '/admin/reports'
+    | '/admin/reviews'
+    | '/admin/users'
     | '/erp/audit'
     | '/erp/inventory'
     | '/erp/orders'
@@ -274,6 +465,7 @@ export interface FileRouteTypes {
     | '/erp/settings'
     | '/erp/support'
     | '/product/$slug'
+    | '/sales/dashboard'
     | '/erp/'
   fileRoutesById: FileRoutesById
 }
@@ -284,12 +476,28 @@ export interface RootRouteChildren {
   CartRoute: typeof CartRoute
   CheckoutRoute: typeof CheckoutRoute
   ErpRoute: typeof ErpRouteWithChildren
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
+  PartnerApplyRoute: typeof PartnerApplyRoute
   RegisterRoute: typeof RegisterRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   SalonRoute: typeof SalonRoute
   ShopRoute: typeof ShopRoute
   TrackRoute: typeof TrackRoute
+  AdminBusinessPartnersRoute: typeof AdminBusinessPartnersRoute
+  AdminCategoriesRoute: typeof AdminCategoriesRoute
+  AdminCouponsRoute: typeof AdminCouponsRoute
+  AdminCustomersRoute: typeof AdminCustomersRoute
+  AdminDashboardRoute: typeof AdminDashboardRoute
+  AdminInventoryRoute: typeof AdminInventoryRoute
+  AdminInvoicesRoute: typeof AdminInvoicesRoute
+  AdminOrdersRoute: typeof AdminOrdersRoute
+  AdminProductsRoute: typeof AdminProductsRoute
+  AdminReportsRoute: typeof AdminReportsRoute
+  AdminReviewsRoute: typeof AdminReviewsRoute
+  AdminUsersRoute: typeof AdminUsersRoute
   ProductSlugRoute: typeof ProductSlugRoute
+  SalesDashboardRoute: typeof SalesDashboardRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -336,6 +544,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ErpRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -343,11 +558,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/partner-apply': {
+      id: '/partner-apply'
+      path: '/partner-apply'
+      fullPath: '/partner-apply'
+      preLoaderRoute: typeof PartnerApplyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/register': {
       id: '/register'
       path: '/register'
       fullPath: '/register'
       preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/salon': {
@@ -369,6 +598,90 @@ declare module '@tanstack/react-router' {
       path: '/track'
       fullPath: '/track'
       preLoaderRoute: typeof TrackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/business-partners': {
+      id: '/admin/business-partners'
+      path: '/admin/business-partners'
+      fullPath: '/admin/business-partners'
+      preLoaderRoute: typeof AdminBusinessPartnersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/categories': {
+      id: '/admin/categories'
+      path: '/admin/categories'
+      fullPath: '/admin/categories'
+      preLoaderRoute: typeof AdminCategoriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/coupons': {
+      id: '/admin/coupons'
+      path: '/admin/coupons'
+      fullPath: '/admin/coupons'
+      preLoaderRoute: typeof AdminCouponsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/customers': {
+      id: '/admin/customers'
+      path: '/admin/customers'
+      fullPath: '/admin/customers'
+      preLoaderRoute: typeof AdminCustomersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/dashboard': {
+      id: '/admin/dashboard'
+      path: '/admin/dashboard'
+      fullPath: '/admin/dashboard'
+      preLoaderRoute: typeof AdminDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/inventory': {
+      id: '/admin/inventory'
+      path: '/admin/inventory'
+      fullPath: '/admin/inventory'
+      preLoaderRoute: typeof AdminInventoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/invoices': {
+      id: '/admin/invoices'
+      path: '/admin/invoices'
+      fullPath: '/admin/invoices'
+      preLoaderRoute: typeof AdminInvoicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/orders': {
+      id: '/admin/orders'
+      path: '/admin/orders'
+      fullPath: '/admin/orders'
+      preLoaderRoute: typeof AdminOrdersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/products': {
+      id: '/admin/products'
+      path: '/admin/products'
+      fullPath: '/admin/products'
+      preLoaderRoute: typeof AdminProductsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/reports': {
+      id: '/admin/reports'
+      path: '/admin/reports'
+      fullPath: '/admin/reports'
+      preLoaderRoute: typeof AdminReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/reviews': {
+      id: '/admin/reviews'
+      path: '/admin/reviews'
+      fullPath: '/admin/reviews'
+      preLoaderRoute: typeof AdminReviewsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/admin/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/erp/': {
@@ -441,6 +754,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProductSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sales/dashboard': {
+      id: '/sales/dashboard'
+      path: '/sales/dashboard'
+      fullPath: '/sales/dashboard'
+      preLoaderRoute: typeof SalesDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -477,12 +797,28 @@ const rootRouteChildren: RootRouteChildren = {
   CartRoute: CartRoute,
   CheckoutRoute: CheckoutRoute,
   ErpRoute: ErpRouteWithChildren,
+  ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
+  PartnerApplyRoute: PartnerApplyRoute,
   RegisterRoute: RegisterRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   SalonRoute: SalonRoute,
   ShopRoute: ShopRoute,
   TrackRoute: TrackRoute,
+  AdminBusinessPartnersRoute: AdminBusinessPartnersRoute,
+  AdminCategoriesRoute: AdminCategoriesRoute,
+  AdminCouponsRoute: AdminCouponsRoute,
+  AdminCustomersRoute: AdminCustomersRoute,
+  AdminDashboardRoute: AdminDashboardRoute,
+  AdminInventoryRoute: AdminInventoryRoute,
+  AdminInvoicesRoute: AdminInvoicesRoute,
+  AdminOrdersRoute: AdminOrdersRoute,
+  AdminProductsRoute: AdminProductsRoute,
+  AdminReportsRoute: AdminReportsRoute,
+  AdminReviewsRoute: AdminReviewsRoute,
+  AdminUsersRoute: AdminUsersRoute,
   ProductSlugRoute: ProductSlugRoute,
+  SalesDashboardRoute: SalesDashboardRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -52,13 +52,13 @@ export function ErpShell() {
 
   // Dynamic navigation items filtered by RBAC permissions
   const allSections = [
-    { to: "/erp", label: "Dashboard", icon: LayoutDashboard, exact: true, roles: ["admin", "sales_staff", "customer_service", "stylist"] as UserRole[] },
-    { to: "/erp/sales", label: "Sales & P&L", icon: TrendingUp, roles: ["admin", "sales_staff"] as UserRole[] },
-    { to: "/erp/orders", label: "Orders", icon: ShoppingCart, roles: ["admin", "sales_staff", "customer_service"] as UserRole[] },
-    { to: "/erp/pos", label: "Point of sale", icon: ScanBarcode, roles: ["admin", "sales_staff"] as UserRole[] },
-    { to: "/erp/inventory", label: "Inventory", icon: Boxes, roles: ["admin", "sales_staff"] as UserRole[] },
-    { to: "/erp/salon", label: "Salon ops", icon: CalendarHeart, roles: ["admin", "customer_service", "stylist"] as UserRole[] },
-    { to: "/erp/support", label: "Customer service", icon: Headphones, roles: ["admin", "customer_service"] as UserRole[] },
+    { to: "/erp", label: "Dashboard", icon: LayoutDashboard, exact: true, roles: ["admin", "sales", "sales_staff"] as UserRole[] },
+    { to: "/erp/sales", label: "Sales & P&L", icon: TrendingUp, roles: ["admin", "sales", "sales_staff"] as UserRole[] },
+    { to: "/erp/orders", label: "Orders", icon: ShoppingCart, roles: ["admin", "sales", "sales_staff"] as UserRole[] },
+    { to: "/erp/pos", label: "Point of sale", icon: ScanBarcode, roles: ["admin", "sales", "sales_staff"] as UserRole[] },
+    { to: "/erp/inventory", label: "Inventory", icon: Boxes, roles: ["admin", "sales", "sales_staff"] as UserRole[] },
+    { to: "/erp/salon", label: "Salon ops", icon: CalendarHeart, roles: ["admin", "sales", "sales_staff"] as UserRole[] },
+    { to: "/erp/support", label: "Customer service", icon: Headphones, roles: ["admin", "sales", "sales_staff"] as UserRole[] },
     { to: "/erp/settings", label: "Settings", icon: Settings, roles: ["admin"] as UserRole[] },
     { to: "/erp/audit", label: "Audit log", icon: ScrollText, roles: ["admin"] as UserRole[] },
   ];
@@ -67,9 +67,8 @@ export function ErpShell() {
 
   const roleLabelMap: Record<UserRole, string> = {
     admin: "Administrator",
+    sales: "Sales Executive",
     sales_staff: "Sales Executive",
-    customer_service: "Customer Service",
-    stylist: "Salon Stylist",
     customer: "Customer",
   };
 

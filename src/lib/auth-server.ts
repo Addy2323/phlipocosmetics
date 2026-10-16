@@ -2,7 +2,7 @@ import { db, schema } from "./db";
 import { eq, and } from "drizzle-orm";
 import crypto from "crypto";
 
-export type UserRole = "admin" | "sales_staff" | "customer_service" | "stylist" | "customer";
+export type UserRole = "admin" | "sales" | "sales_staff" | "customer";
 
 export interface SessionUser {
   id: string;
